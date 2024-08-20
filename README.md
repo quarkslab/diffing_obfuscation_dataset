@@ -21,7 +21,13 @@ This dataset can be used for many research subject centered around obfuscation, 
 - Obfuscation detection
 - Diffing of obfuscated binaries...
 
-# Detailed description
+## Usage
+
+TODO: Installation
+
+TODO: Usage of helper cli tool
+
+## Detailed description
 
 The dataset is organized as follows. 
 
@@ -88,6 +94,8 @@ Similarly, our binaries are obfuscated given a seed. It influences how the obfus
 > Notice that the obfuscation level indicates the percentage of functions obfuscated inside a binary. It does not indicate the obfuscation ratio applied within a function. For example, 50% indicates that 50% of the binary function were obfuscated given an obfuscation schema, but it does not mean that 50% of a function content were obfuscated.
 
 A sum-up of the dataset is available in the Table below: [TODO].
+
+
 
 # How to contribute
 

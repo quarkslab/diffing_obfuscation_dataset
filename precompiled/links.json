@@ -1,0 +1,15 @@
+{
+    "zlib": {
+        "source": {
+
+        },
+        "obfuscated": {
+            "tigress": {
+                "MBA": {"link":  "url", "size":  10000, "hash":  "EDEDEZ"}
+            },
+            "ollvm": {
+
+            }
+        }
+    }
+}

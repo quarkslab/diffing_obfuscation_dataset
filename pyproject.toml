@@ -1,0 +1,23 @@
+[project]
+name = "obfuscation_dataset"
+description = "Obfuscation dataset"
+authors = [
+    {name = "R. Cohen", email = "rcohen@quarkslab.com"},
+    {name = "R. David", email = "rdavid@quarkslab.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Topic :: Security",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: Apache Software License"
+]
+dynamic = ["version"]
+dependencies = [
+    "click",
+]
+
+[project.scripts]
+obfu-dataset-cli = "obfu_dataset.__main__:main"
+
