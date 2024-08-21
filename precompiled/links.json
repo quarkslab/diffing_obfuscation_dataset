@@ -1,8 +1,7 @@
 {
     "zlib": {
-        "source": {
-
-        },
+        "source": {"link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/features.json", "size":1000, "hash": "2d2ce0597a48f964a76bb276e1de5099"}
+        ,
         "obfuscated": {
             "tigress": {
                 "MBA": {"link":  "url", "size":  10000, "hash":  "EDEDEZ"}

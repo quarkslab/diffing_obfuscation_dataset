@@ -16,6 +16,9 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "click",
+    "requests", 
+    "python-binexport", 
+    "quokka-project", 
 ]
 
 [project.scripts]
