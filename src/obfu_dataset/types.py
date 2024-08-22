@@ -3,6 +3,7 @@ from enum import Enum, auto
 from dataclasses import dataclass
 
 SEED_NUMBER=10
+OLLVM_PASS = [ObPass.CFF, ObPass.OPAQUE, ObPass.ENCODEARITH, ObPass.CFF_ENCODEARITH_OPAQUE]
 
 class BinaryType(Enum):
     PLAIN = "plain"
@@ -15,7 +16,7 @@ class Obfuscator(Enum):
 class Compiler(Enum):
     CLANG = "clang"
     GCC = "gcc"
-
+    
 class ObPass(Enum):
     COPY = "copy"
     MERGE = "merge"
@@ -58,7 +59,8 @@ NOT_EXISTING_BENCH = [
 '''
 PARTIAL
 * minilua / tigress / virtualize / 80 / [3/10] (manquant)
-* sqlite / tigress / virtualize / 20 / [1/10]  (manquant)
+
+* sqlite / tigress / virtualize / 20 / [1/10]  
                                 / 30 / [2/10]
                                 / 40 / [2/10]
                                 / 50 / [2/10]
@@ -66,8 +68,55 @@ PARTIAL
                                 / 70 / [4/10]
                                 / 80 / [3/10]
                                 / 90 / [4/10]
-'''
+                            
+* sqlite / tigress / mix1 / 10 / [1/10]
+                            20 / [1/10]
+                            30 / [3/10]
+                            60 / [1/10]
+                            70 / [4/10]
+                            80 / [1/10]
+                            90 / [3/10]
+                            100 / [5/10]
+                            
+* sqlite / tigress / mix2 / 10 / [1/10]
+                            20 / [1/10]
+                            30 / [3/10]
+                            60 / [1/10]
+                            70 / [4/10]
+                            80 / [1/10]
+                            90 / [3/10]
+                            100 / [5/10]
 
+* freetype / tigress / merge / 100 / [10/10] (all of them are missing)
+
+* freetype / tigress / opaque / 10 / [3/10]
+                              / 20 / [5/10]
+                              / 30 / [5/10]
+                              / 40 / [8/10]
+                              / 50 / [9/10]
+                              / 60 / [8/10]
+                              / 70 / [8/10]
+                              / 80 / [10/10]
+                              / 90 / [9/10]
+                              / 100 / [9/10]
+                              
+* freetype / tigress / mix1 / 20 / [1/10]
+                              30 / [1/10]
+                              50 / [1/10]
+                              70 / [2/10]
+                              80 / [1/10]
+                              90 / [1/10]
+                              100 / [1/10]
+                              
+* freetype / tigress / mix2 / 20 / [1/10]
+                              30 / [1/10]
+                              50 / [1/10]
+                              70 / [2/10]
+                              80 / [1/10]
+                              90 / [1/10]
+                              100 / [1/10]
+
+'''
 
 @dataclass
 class Sample:
@@ -83,18 +132,29 @@ class Sample:
     root_path: Path
 
     @property
-    def basename(self) -> str:
+    def basename_bin(self) -> str:
         '''
-        Name mangling in source:
-            [project]_[compiler]_[optim].c etc..
-        Name mangling in binaries:
-            [project]_[obfuscator]_[compiler]_[obfpass]_[level]_[seed]_[optim].c
+        Name mangling for binaries:
+            Plain : [project]_[compiler]_[archi]_[optim].exe
+            Obfuscated : [project]_[obfuscator]_[compiler]_[archi]_[obfpass]_[level]_[seed]_[optim].exe
         '''
         match self.type:
             case BinaryType.PLAIN:
-                pass # TODO:
+                return self.project + '_' + self.compiler + '_' + self.architecture + '_' + self.optimization
             case BinaryType.OBFUSCATED:
-                pass # TODO
+                return self.project + '_' + self.obfuscator + '_' + self.compiler + '_' + self.architecture + '_' + self.obfpass + '_' + self.level + '_' + self.optimization
+    @property
+    def basename_src(self) -> str:
+        '''
+        Name mangling for src
+            Plain : [project].c
+            Obfuscated : [project]_[obfuscator]_[compiler]_[archi]_[obfpass]_[level]_[seed].c  #Including compiler and archi is meaningful for Tigress
+        '''
+        match self.type:
+            case BinaryType.PLAIN:
+                return self.project
+            case BinaryType.OBFUSCATED:
+                return self.project + '_' + self.obfuscator + '_' + self.compiler + '_' + self.architecture + '_' + self.obfpass + '_' + self.level + '_' + self.seed
 
     @property
     def base_dir(self) -> Path:
@@ -108,23 +168,23 @@ class Sample:
 
     @property
     def binary_file(self) -> Path:
-        return self.base_dir / (self.basename+".exe")
+        return self.base_dir / (self.basename_bin +".exe")
 
     @property
     def binexport_file(self) -> Path:
-        return self.base_dir / (self.basename + ".BinExport")
+        return self.base_dir / (self.basename_bin + ".BinExport")
 
     @property
     def quokka_file(self) -> Path:
-        return self.base_dir / (self.basename + ".Quokka")
+        return self.base_dir / (self.basename_bin + ".Quokka")
 
     @property
     def source_file(self) -> Path:
-        return self.base_dir / (self.basename + ".c")
+        return self.base_dir / (self.basename_src + ".c")
 
     @property
     def symbols_file(self) -> Path:
-        return self.base_dir / (self.basename + ".json")
+        return self.base_dir / (self.basename_bin + ".json")
 
     def is_downloaded(self) -> bool:
         return self.base_dir.exists()

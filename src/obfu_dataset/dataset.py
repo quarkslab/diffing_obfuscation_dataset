@@ -8,7 +8,7 @@ import hashlib
 
 from obfu_dataset.types import Project, Obfuscator, ObPass, Sample, \
                                Compiler, Architecture, OptimLevel, BinaryType, \
-                               SEED_NUMBER
+                               SEED_NUMBER, OLLVM_PASS
 
 
 
@@ -29,7 +29,6 @@ class ObfuDataset(object):
 
 
     def _init_dirs(self):
-        ollvm_pass = [ObPass.CFF, ObPass.OPAQUE, ObPass.ENCODEARITH, ObPass.CFF_ENCODEARITH_OPAQUE]
         
         root = Path(self.root_path)
         for proj in Project:
@@ -48,7 +47,7 @@ class ObfuDataset(object):
                         ob_pass_dir = obfu_dir / ob_pass.value
                         ob_pass_dir.mkdir(parents=True, exist_ok=True)
                 elif obfu.value == 'ollvm':
-                    for ob_pass in ollvm_pass:
+                    for ob_pass in OLLVM_PASS:
                         ob_pass_dir = obfu_dir / ob_pass.value
                         ob_pass_dir.mkdir(parents=True, exist_ok=True)
 
