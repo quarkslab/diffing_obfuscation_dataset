@@ -8,8 +8,9 @@ import hashlib
 
 from obfu_dataset.types import Project, Obfuscator, ObPass, Sample, \
                                Compiler, Architecture, OptimLevel, BinaryType, \
-                               SEED_NUMBER, OLLVM_PASS
+                               SEED_NUMBER
 
+OLLVM_PASS = [ObPass.CFF, ObPass.OPAQUE, ObPass.ENCODEARITH, ObPass.CFF_ENCODEARITH_OPAQUE]
 
 
 class ObfuDataset(object):

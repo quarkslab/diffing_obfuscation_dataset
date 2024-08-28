@@ -3,7 +3,6 @@ from enum import Enum, auto
 from dataclasses import dataclass
 
 SEED_NUMBER=10
-OLLVM_PASS = [ObPass.CFF, ObPass.OPAQUE, ObPass.ENCODEARITH, ObPass.CFF_ENCODEARITH_OPAQUE]
 
 class BinaryType(Enum):
     PLAIN = "plain"
@@ -26,8 +25,8 @@ class ObPass(Enum):
     VIRTUALIZE = "virtualize"
     ENCODEARITH = "encodearith"
     ENCODELITERAL = "encodeliteral"
-    CFF_ENCODEARITH_OPAQUE = "mix-1"
-    CFF_ENCODEARITH_OPAQUE_SPLIT = "mix-2"
+    CFF_ENCODEARITH_OPAQUE = "mix1"
+    CFF_ENCODEARITH_OPAQUE_SPLIT = "mix2"
 
 class Project(Enum):
     ZLIB = "zlib"
