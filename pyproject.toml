@@ -1,3 +1,19 @@
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["obfu_dataset"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+obfu_dataset = ["precompiled/*"]
+
+[tool.setuptools.package-dir]
+obfu_dataset = "src/obfu_dataset"
+
+
 [project]
 name = "obfuscation_dataset"
 description = "Obfuscation dataset"
