@@ -1,14 +1,717 @@
 {
-    "zlib": {
-        "source": {"link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/features.json", "size":1000, "hash": "2d2ce0597a48f964a76bb276e1de5099"}
-        ,
-        "obfuscated": {
-            "tigress": {
-                "MBA": {"link":  "url", "size":  10000, "hash":  "EDEDEZ"}
-            },
-            "ollvm": {
-
-            }
+  "zlib": {
+    "sources": {
+      "project": "zlib",
+      "type": "plain",
+      "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/zlib-sources.zip",
+      "size": 1141275,
+      "hash": "f8b79a233ae5f59514901d151efe5077",
+      "obfuscator": null,
+      "obpass": null
+    },
+    "obfuscated": {
+      "tigress": {
+        "copy": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_copy.zip",
+          "size": 109259546,
+          "hash": "f0dfc02de04626e8ec7d8c6526ef3c24",
+          "obfuscator": "tigress",
+          "obpass": "copy"
+        },
+        "merge": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_merge.zip",
+          "size": 100558907,
+          "hash": "40b269a14ed568e1af394588e6987c47",
+          "obfuscator": "tigress",
+          "obpass": "merge"
+        },
+        "split": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_split.zip",
+          "size": 104734545,
+          "hash": "1a4448a7bffff9d3575621b68cc301c5",
+          "obfuscator": "tigress",
+          "obpass": "split"
+        },
+        "CFF": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_CFF.zip",
+          "size": 119970145,
+          "hash": "c42f8c6f4cb0cdd9087463c5484eccf2",
+          "obfuscator": "tigress",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_opaque.zip",
+          "size": 98251344,
+          "hash": "2a7edbe4e39736a9705997d437311d19",
+          "obfuscator": "tigress",
+          "obpass": "opaque"
+        },
+        "virtualize": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_virtualize.zip",
+          "size": 155801947,
+          "hash": "a9fc464506de5018b257a9c3d8578f54",
+          "obfuscator": "tigress",
+          "obpass": "virtualize"
+        },
+        "encodearith": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_encodearith.zip",
+          "size": 105021714,
+          "hash": "cf44cfa172bedbbb11869c4cae025aeb",
+          "obfuscator": "tigress",
+          "obpass": "encodearith"
+        },
+        "encodeliteral": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_encodeliteral.zip",
+          "size": 97184702,
+          "hash": "a0815ead089a1ca2ab6d0fd92501fec2",
+          "obfuscator": "tigress",
+          "obpass": "encodeliteral"
+        },
+        "mix1": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_mix1.zip",
+          "size": 133359668,
+          "hash": "2e93c11ef0668e20fc9189c09e6aaf43",
+          "obfuscator": "tigress",
+          "obpass": "mix1"
+        },
+        "mix2": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_mix2.zip",
+          "size": 137761403,
+          "hash": "1192712e5749e16fb8a6683ba298845b",
+          "obfuscator": "tigress",
+          "obpass": "mix2"
         }
+      },
+      "ollvm": {
+        "CFF": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_CFF.zip",
+          "size": 95989995,
+          "hash": "b503e851286cea674dbcdabcd755d303",
+          "obfuscator": "ollvm",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_opaque.zip",
+          "size": 81029440,
+          "hash": "e99b29510a5d7ddd9b9baedacb1b4617",
+          "obfuscator": "ollvm",
+          "obpass": "opaque"
+        },
+        "encodearith": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_encodearith.zip",
+          "size": 65126982,
+          "hash": "0d07a6e6345d86e3a9a47ac893a70468",
+          "obfuscator": "ollvm",
+          "obpass": "encodearith"
+        },
+        "mix1": {
+          "project": "zlib",
+          "type": "obfuscated",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_mix1.zip",
+          "size": 140264038,
+          "hash": "fd6d9d8633f02d7d712f236cca8d0f12",
+          "obfuscator": "ollvm",
+          "obpass": "mix1"
+        }
+      }
     }
+  },
+  "lz4": {
+    "sources": {
+      "project": "lz4",
+      "type": "plain",
+      "link": "https://foo",
+      "size": 0,
+      "hash": "DEADBEEF",
+      "obfuscator": null,
+      "obpass": null
+    },
+    "obfuscated": {
+      "tigress": {
+        "copy": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "copy"
+        },
+        "merge": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "merge"
+        },
+        "split": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "split"
+        },
+        "CFF": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "opaque"
+        },
+        "virtualize": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "virtualize"
+        },
+        "encodearith": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodearith"
+        },
+        "encodeliteral": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodeliteral"
+        },
+        "mix1": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix1"
+        },
+        "mix2": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix2"
+        }
+      },
+      "ollvm": {
+        "CFF": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "opaque"
+        },
+        "encodearith": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "encodearith"
+        },
+        "mix1": {
+          "project": "lz4",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "mix1"
+        }
+      }
+    }
+  },
+  "minilua": {
+    "sources": {
+      "project": "minilua",
+      "type": "plain",
+      "link": "https://foo",
+      "size": 0,
+      "hash": "DEADBEEF",
+      "obfuscator": null,
+      "obpass": null
+    },
+    "obfuscated": {
+      "tigress": {
+        "copy": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "copy"
+        },
+        "merge": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "merge"
+        },
+        "split": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "split"
+        },
+        "CFF": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "opaque"
+        },
+        "virtualize": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "virtualize"
+        },
+        "encodearith": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodearith"
+        },
+        "encodeliteral": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodeliteral"
+        },
+        "mix1": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix1"
+        },
+        "mix2": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix2"
+        }
+      },
+      "ollvm": {
+        "CFF": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "opaque"
+        },
+        "encodearith": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "encodearith"
+        },
+        "mix1": {
+          "project": "minilua",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "mix1"
+        }
+      }
+    }
+  },
+  "sqlite": {
+    "sources": {
+      "project": "sqlite",
+      "type": "plain",
+      "link": "https://foo",
+      "size": 0,
+      "hash": "DEADBEEF",
+      "obfuscator": null,
+      "obpass": null
+    },
+    "obfuscated": {
+      "tigress": {
+        "copy": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "copy"
+        },
+        "merge": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "merge"
+        },
+        "split": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "split"
+        },
+        "CFF": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "opaque"
+        },
+        "virtualize": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "virtualize"
+        },
+        "encodearith": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodearith"
+        },
+        "encodeliteral": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodeliteral"
+        },
+        "mix1": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix1"
+        },
+        "mix2": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix2"
+        }
+      },
+      "ollvm": {
+        "CFF": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "opaque"
+        },
+        "encodearith": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "encodearith"
+        },
+        "mix1": {
+          "project": "sqlite",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "mix1"
+        }
+      }
+    }
+  },
+  "freetype": {
+    "sources": {
+      "project": "freetype",
+      "type": "plain",
+      "link": "https://foo",
+      "size": 0,
+      "hash": "DEADBEEF",
+      "obfuscator": null,
+      "obpass": null
+    },
+    "obfuscated": {
+      "tigress": {
+        "copy": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "copy"
+        },
+        "merge": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "merge"
+        },
+        "split": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "split"
+        },
+        "CFF": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "opaque"
+        },
+        "virtualize": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "virtualize"
+        },
+        "encodearith": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodearith"
+        },
+        "encodeliteral": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "encodeliteral"
+        },
+        "mix1": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix1"
+        },
+        "mix2": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "tigress",
+          "obpass": "mix2"
+        }
+      },
+      "ollvm": {
+        "CFF": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "CFF"
+        },
+        "opaque": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "opaque"
+        },
+        "encodearith": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "encodearith"
+        },
+        "mix1": {
+          "project": "freetype",
+          "type": "obfuscated",
+          "link": "https://foo",
+          "size": 0,
+          "hash": "DEADBEEF",
+          "obfuscator": "ollvm",
+          "obpass": "mix1"
+        }
+      }
+    }
+  }
 }
