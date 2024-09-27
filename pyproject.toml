@@ -34,7 +34,8 @@ dependencies = [
     "click",
     "requests", 
     "python-binexport", 
-    "quokka-project", 
+    "quokka-project",
+    "rich"
 ]
 
 [project.scripts]
