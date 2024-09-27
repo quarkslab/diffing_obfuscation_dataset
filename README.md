@@ -6,7 +6,7 @@ Welcome to the official repository of the Obfuscation-Dataset.
 > This repository is related to an ongoing work. It is currently subject to changes. 
 
 
-It was produced and published with the paper [TODO]. 
+[//]: <> It was produced and published with the paper [TODO]. 
 
 ## Introduction
 
