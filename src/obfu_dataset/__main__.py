@@ -36,7 +36,7 @@ from obfu_dataset.types import BinaryType
 from obfu_dataset import get_download_link, DownloadLink
 from obfu_dataset.types import Project, Obfuscator, ObPass, OptimLevel, Architecture, Compiler
 from obfu_dataset.dataset import ObfuDataset
-from obfu_dataset.obfuscators.ollvm import OLLVM_PASS
+from obfu_dataset.obfuscators.ollvm import OLLVM_PASS, gen_ollvm_annotated_source
 from obfu_dataset.obfuscators.tigress import TIGRESS_PASS, check_tigress_environ, run_tigress, get_merge_parameters, \
                                              get_mix1_parameters, get_mix2_parameters
 
@@ -343,7 +343,6 @@ def create(root, ida_script):
                             
     #OLLVM source generation
     for proj in Project:
-        src_file = dataset.get_src_path(proj) / proj.value + ".c"
         sample = dataset.get_plain_sample(proj)
 
         for obf in OLLVM_PASS:
@@ -353,7 +352,7 @@ def create(root, ida_script):
                 level_path.mkdir(parent=True, exist_ok=True)
                 for seed in range(1, SEED_NUMBER+1):
                     output_file = level_path / f"{proj.value}_{Obfuscator.OLLVM.value}_gcc_x64_{obf.value}_{obf_level}_{str(seed)}.c"
-                    if gen_ollvm_obfuscated(sample, output_file, obf, obf_level, seed):
+                    if gen_ollvm_annotated_source(output_file, sample, obf, obf_level, seed):
                         logging.info(f"OLLVM file was generated at location:{output_file}")
                     else:
                         logging.warning(f"OLLVM fail to generate: {output_file}")

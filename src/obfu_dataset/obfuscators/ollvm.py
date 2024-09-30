@@ -1,8 +1,12 @@
 import random
 import re
+from operator import attrgetter
+from random import Random
+
 from obfu_dataset import ObPass, Sample
 from pathlib import Path
 import clang.cindex
+import logging
 
 
 OLLVM_PASS = [
@@ -11,6 +15,13 @@ OLLVM_PASS = [
     ObPass.ENCODEARITH,
     ObPass.CFF_ENCODEARITH_OPAQUE
 ]
+
+def find_libclang() -> Path | None:
+    for file in Path("/lib/x86_64-linux-gnu/").iterdir():
+        if re.match(r"libclang-\d+\.so\.?\d*", file.name):
+            return file
+    return None
+
 
 def _obpass_to_annotation(obpass):
     match obpass:
@@ -28,156 +39,75 @@ def _obpass_to_annotation(obpass):
     return f"__attribute__(({s}))"
 
 
-def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, obf_level: int, seed: int):
-    symbols = sample.get_symbols()
+def compute_symbols_stats(bin_symbols, funcs):
+    # Test intersection of functions and the binary
+    # bin_symbols = {x for x in get_symbols(srcfile.with_suffix("")).values()}
+    source_symbols = {f.spelling for l in funcs.values() for f in l}
+    print("Source but not Binary:\n", source_symbols - bin_symbols)
+    print("------------------------------------------")
+    print("Binary but not Source:\n", bin_symbols - source_symbols)
+    print("------------------------------------------")
+    print(f"src: {len(source_symbols)} | bin: {len(bin_symbols)}")
 
 
+def find_functions(node, out_files):
+    """
+    Search function nodes and fill `out_files` object
+    """
+    # Check if the node is a function declaration or definition
+    if node.kind == clang.cindex.CursorKind.FUNCTION_DECL:
+        # Get the location of the function declaration
+        file = Path(node.location.file.name)
 
-def gen_ollvm_annotated_source(sample: Sample, output_file, obf, obf_level, seed):
-    src_dir = root / proj.value / "sources"
-    # In order to have the complete list of functions that are available for obfuscation, need to rely on -O0 binary
-    plain_binary = [f for f in src_dir.iterdir() if (f.suffix == '.exe') and ('O0' in f.name)][0]
-    plain_src = [f for f in src_dir.iterdir() if (f.suffix == '.c')][0]
-    symbols_path = plain_binary / '.json'
-    if not symbols_path.exists():
-        os.environ["IDA_PATH"] = shutil.which("ida")
-        ida = IDA(plain_binary, script_ida, [])
-        ida.start()
-        retcode = ida.wait()
+        # print(file, type(file))
+        if file.name in out_files:
+            out_files[file.name].append(node)
 
-    with open(symbols_path, 'r') as file:
-        function_names = json.load(file)
-    function_list = [v for v in function_names.values()]
-    random.Random(SEED_NUMBER).shuffle(function_names)
-    random.Random(seed).shuffle(function_names)
-    candidate_functions = function_names[:int(obf_level / 100 * len(function_names))]
+    # Recurse into child nodes
+    for child in node.get_children():
+        find_functions(child, out_files)
 
-    # Load the .c file contents
-    with open(plain_src, 'r') as out:
-        readlines = out.readlines()
 
-    for func in candidate_functions:
-        # Omit these functions
-        if (func == 'snprintf') or (func == 'compress_block') or (func == 'deflate_huff') or (
-                func == 'inflate_table') or (func == 'printf') or (func == 'strlen') or (func == 'gzprintf') or (
-                func == 'FT_Render_Glyph_Internal') or (func == 'psh_blues_scale_zones'):
-            continue
+def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, obf_level: int, seed: int) -> bool:
+    symbols: set[str] = set(sample.get_symbols().values())
 
-        # Candidate lines to add pragma
-        candidates = [(i, line) for (i, line) in enumerate(readlines) if (
-                (' ' + func + '(' in line) or
-                ('*' + func + '(' in line)) and
-                      (';' not in line) and
-                      (':' not in line) and
-                      ('\\' not in line) and
-                      (' ' + func + '()' not in line) and
-                      ('if ' not in line) and
-                      ('return ' not in line) and
-                      ('=' not in line) and
-                      ('if' not in line) and
-                      (not line.startswith('  ' + func)) and
-                      (not line.startswith('    ' + func)) and
-                      (not line.startswith('      ' + func)) and
-                      (not line.startswith('   || ')) and
-                      (not line.startswith('          ' + func)) and
-                      (not line.startswith('           ' + func)) and
-                      (re.match("[ ]*" + func, line) == None) and
-                      ('>' not in line) and
-                      ('#' not in line) and
-                      ('^' not in line) and
-                      (not line.startswith('   && ' + func)) and
-                      (not line.startswith('     || ' + func)) and
-                      (not line.startswith('     && ' + func)) and
-                      ('ENC' not in line) and
-                      (not line.startswith('          + ' + func))
-                      and (not line.startswith('           + '))
-                      and (not line.startswith('  ' + func)) and
-                      (' switch(' not in line) and
-                      ('/2' not in line) and
-                      (not line.startswith('       && ' + func))
-                      and (' while(' not in line) and
-                      (not line.startswith('         || ' + func)) and
-                      (not line.startswith('           && ' + func)) and
-                      (not line.endswith('&&\n')) and
-                      (not line.startswith('\t  ' + func)) and
-                      (not line.startswith('\t\t\t\t\t\t  ' + func)) and
-                      (not line.startswith('\t\t\t\t\t\t ' + func)) and
-                      (not line.startswith('\t\t\t\t\t   ' + func)) and
-                      (not line.startswith('\t\t  ' + func)) and
-                      ('? ' + func not in line) and
-                      (not line.startswith('\t\t ' + func)) and
-                      (not line.startswith('\t\t\t ' + func)) and
-                      (not line.startswith('\t\t\t  ')) and
-                      (not line.startswith('\t\t  ' + func)) and
-                      ('switch ( ' + func not in line) and
-                      (not line.startswith('\t\t   ' + func)) and
-                      ('\t' not in line)]  # TODO refine the list by removing doublons
+    # Initialize the Clang index
+    libclang = find_libclang()
+    if not libclang:
+        logging.error("can't find libclang.so")
+        return False
+    clang.cindex.Config.set_library_file(libclang)
+    index = clang.cindex.Index.create()
 
-        # Dealing with exceptions
-        if len(candidates) == 0:  # Imported functions
-            continue
-        for c in candidates:  # Invalid candidate
-            if ('{' not in c[1]) and c[1].endswith('\n'):
-                if ('{' not in readlines[c[0] + 1]):
-                    candidates.remove(c)
+    # Read both files
+    cname = sample.source_file.name
+    hfile = sample.source_file.with_suffix(".h")
+    files = {
+        cname: open(sample.source_file, 'r').readlines(),
+        hfile.name: open(hfile, "r").readlines()
+    }
 
-        first_idx, line = candidates[0][0], candidates[0][1]
-        signature = line.split(func)[0]
+    # Parse the file with Clang
+    translation_unit = index.parse(sample.source_file)
 
-        if func == 'sqlite3StrAccumFinish':
-            first_idx, line = candidates[0][0], candidates[0][1]
-        elif len(candidates) == 1:
-            first_idx, line = candidates[-1][0], candidates[-1][1]
-        else:
-            if func == 'sqlite3StrAccumFinish':
-                first_idx, line = candidates[0][0], candidates[0][1]
-            if (re.match("[ ]*" + func, candidates[-1][1]) != None):
-                first_idx, line = candidates[-2][0], candidates[-2][1]
-            else:
-                first_idx, line = candidates[-1][0], candidates[-1][1]
+    # Get the AST root node (translation unit) and search for functions
+    funcs = {x: [] for x in files}
+    find_functions(translation_unit.cursor, funcs)
 
-        if signature.startswith('static') or signature.startswith('LUA_API') or signature.startswith(
-                'l_noret') or signature.startswith('LUALIB_API') or signature.startswith(
-                'SQLITE_PRIVATE') or signature.startswith('SQLITE_API') or signature.startswith(
-                'FT_LOCAL') or signature.startswith('FT_LOCAL_DEF') or signature.replace(' ', '').startswith(
-                'FT_Error') or signature.startswith('  static') or signature.startswith(
-                '  FT_LOCAL_DEF') or signature.startswith('  FT_EXPORT_DEF') or signature.startswith('  FT_BASE_DEF'):
-            args = line.split(func)[1].replace('{', '')
-            end_args_cpt = 1
-            while ')' not in args:  # Declaring the signature takes more than 1 line
-                args += readlines[first_idx + end_args_cpt].replace('\n', '').replace('{', '')
-                end_args_cpt += 1
+    # Take .c functions shuffle them to select a subset to obfuscate
+    function_list = [x for x in funcs[cname]]
+    Random(seed).shuffle(function_list)  # shuffle elements
+    candidate_functions = function_list[:int(obf_level / 100 * len(function_list))]
 
-            match obf.value:
-                case "CFF":
-                    readlines.insert(first_idx, signature + func + args + '() __attribute((__annotate__(("fla"))));\n')
-                case "opaque":
-                    readlines.insert(first_idx, signature + func + args + '() __attribute((__annotate__(("bcf"))));\n')
-                case "encodearith":
-                    readlines.insert(first_idx, signature + func + args + '() __attribute((__annotate__(("sub"))));\n')
-                case "mix-1":
-                    readlines.insert(first_idx, signature + func + args + '() __attribute((__annotate__(("fla"))));\n')
-                    readlines.insert(first_idx + 1,
-                                     signature + func + args + '() __attribute((__annotate__(("sub"))));\n')
-                    readlines.insert(first_idx + 2,
-                                     signature + func + args + '() __attribute((__annotate__(("bcf"))));\n')
-        else:
-            match obf.value:
-                case "CFF":
-                    readlines.insert(first_idx, signature + func + '() __attribute((__annotate__(("fla"))));\n')
-                case "opaque":
-                    readlines.insert(first_idx, signature + func + '() __attribute((__annotate__(("bcf"))));\n')
-                case "encodearith":
-                    readlines.insert(first_idx, signature + func + '() __attribute((__annotate__(("sub"))));\n')
-                case "mix-1":
-                    readlines.insert(first_idx, signature + func + '() __attribute((__annotate__(("fla"))));\n')
-                    readlines.insert(first_idx + 1, signature + func + '() __attribute((__annotate__(("sub"))));\n')
-                    readlines.insert(first_idx + 2, signature + func + '() __attribute((__annotate__(("bcf"))));\n')
+    # Insert annotation in the source file and write it back
+    # Iterate function from the end of the file to the begining so that line numbers wont be shifted by insertion
+    annotation_line = _obpass_to_annotation(obpass)
+    lines = files[cname]
+    for fun in sorted(candidate_functions, key=lambda x: x.location.line, reverse=True):
+        lines[fun.location.line - 1].insert(annotation_line)
 
-    obf_dir = root / proj.value / "obfuscated" / "ollvm" / obf.value / str(obf_level)
-    obf_basename = proj.value + "_ollvm_clang_x64_" + obf.value + '_' + str(obf_level) + '_' + str(seed) + '.c'
+    # Finally write back file
+    with open(dst_file, "w") as out:
+        out.writelines(lines)
 
-    with open(obf_dir / obf_basename, 'w') as out:
-        for line in readlines:
-            out.write(line)
-    return obf_dir / obf_basename
+    return True
