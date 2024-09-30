@@ -412,32 +412,46 @@ def compile(root, ollvm_dir):
                 output, err = p.communicate()
                 rc = p.returncode
                 logging.info('OLLVM file:', file, 'was compiled with return code:', rc)
-        
-@main.command(name="extract-symbols")
-@click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
-@click.option('-s', "--script", type=click.Path(), required=True, help="Script to extract symbols")
-@click.option('-ida', "--ida_path", type=click.Path(), required=True, help="IDA path")
-def extract_symbols(root, s, ida):
-    logging.info('Extracting of symbols will start')
-    all_binaries = Path(root).glob("*")
-    for (retcode, file) in MultiIDA.map(all_binaries, s, []):
-        logging.info('Extraction for file:', file, 'ended with return code:', retcode)
+
+
+# @main.command(name="extract-symbols")
+# @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
+# @click.option('-s', "--script", type=click.Path(), required=True, help="Script to extract symbols")
+# @click.option('-ida', "--ida_path", type=click.Path(), required=True, help="IDA path")
+# def extract_symbols(root, s, ida):
+#     logging.info('Extracting of symbols will start')
+#     all_binaries = Path(root).glob("*")
+#     for (retcode, file) in MultiIDA.map(all_binaries, s, []):
+#         logging.info('Extraction for file:', file, 'ended with return code:', retcode)
+
+
+def strip_file(console: Console, file: Path) -> None:
+    p = subprocess.Popen(['strip', str(file)], stdin=None, stdout=None, stderr=None)
+    _, _ = p.communicate()
+    if p.returncode == 0:
+        console.log(f":white_check_mark: {file}")
+    else:
+        console.log(f":cross_mark: {file}")
+
 
 @main.command(name="strip")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 def strip(root):
-    logging.info('Stripping will start')
-    files = Path(root).glob("*")
-    for filename in files:
-        cmd = ['strip', filename]
-        p = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        output, err = p.communicate()
-        rc = p.returncode
-        logging.info('File:', filename, 'has been stripped with return code:', rc)
+    console = Console()
+
+    dataset = ObfuDataset(root)
+
+    for sample in dataset.iter_plain_samples():
+        strip_file(console, sample.binary_file)
+
+    for sample in dataset.iter_obfuscated_samples():
+        strip_file(console, sample.binary_file)
+
+
 
 @main.command(name="export")
 def export():
-    # Export both with Quokka & Binexport
+    # TODO: Export both with Quokka & Binexport
     pass
 
 

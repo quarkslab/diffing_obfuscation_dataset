@@ -42,11 +42,11 @@ class Architecture(Enum):
     # AARCH64 = "Aarch64"
 
 class OptimLevel(Enum):
-    O0 = "-O0"
-    # O1 = "-O1"
-    O2 = "-O2"
-    # O3 = "-O3"
-    # OS = "-OS"
+    O0 = "O0"
+    # O1 = "O1"
+    O2 = "O2"
+    # O3 = "O3"
+    # OS = "OS"
 
 
 NOT_EXISTING_BENCH = [

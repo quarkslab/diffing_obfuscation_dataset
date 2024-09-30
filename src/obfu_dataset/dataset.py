@@ -2,13 +2,10 @@ from pathlib import Path
 from typing import Iterable
 import zipfile
 import logging
-import requests
 import json
-import hashlib
-
-from requests.utils import to_key_val_list
 
 # from obfu_dataset import get_download_link
+from obfu_dataset.obfuscators import supported_passes
 from obfu_dataset.obfuscators.ollvm import OLLVM_PASS
 from obfu_dataset.obfuscators.tigress import TIGRESS_PASS
 from obfu_dataset.types import Project, Obfuscator, ObPass, Sample, \
@@ -109,7 +106,7 @@ class ObfuDataset(object):
                       root_path=self.root_path)
 
     def iter_plain_samples(self,
-                                projects: Project | list[Project],
+                                projects: Project | list[Project] = [],
                                 architectures: Architecture | list[Architecture] = [],
                                 compilers: Compiler | list[Compiler] = [],
                                 optims: OptimLevel | list[OptimLevel] = []) -> Iterable[Sample]:
@@ -138,7 +135,7 @@ class ObfuDataset(object):
 
 
     def iter_obfuscated_samples(self,
-                                projects: Project | list[Project],
+                                projects: Project | list[Project] = [],
                                 obfuscators: Obfuscator | list[Obfuscator] = [],
                                 passes: ObPass | list[ObPass] = [],
                                 levels: int | list[int] = [],
@@ -151,9 +148,8 @@ class ObfuDataset(object):
         for proj in projects:
             obfuscators = to_list(obfuscators, Obfuscator, Obfuscator)
             for obfu in obfuscators:
-                # FIXME: Check that passes are supported by the obfuscator
                 passes = to_list(passes, ObPass, ObPass)
-                for obfpass in passes:
+                for obfpass in (x for x in passes if x in supported_passes(obfu)):
                     levels = to_list(levels, int, AVAILABLE_LEVELS)
                     for level in levels:
                         architectures = to_list(architectures, Architecture, Architecture)
