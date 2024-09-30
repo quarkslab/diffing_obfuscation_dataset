@@ -3,9 +3,10 @@ import shutil
 from pathlib import Path
 import subprocess
 import json
+import re
 from random import Random
 
-from obfu_dataset import ObPass, Sample
+from obfu_dataset import ObPass, Sample, Project
 from obfu_dataset.projects import *
 
 TIGRESS_PASS = [
@@ -69,144 +70,153 @@ def run_tigress(infile: Path,
     return p.returncode == 0
 
 
-def tigress_fixup(file):
-    file_contents = open(file, 'r')
-    fixed_file = str(file).replace('.c', '.fixed.c')
-    fixed_contents = open(fixed_file, 'r')
-    readlines = file_contents.readlines()
-    fixed_readlines = []
-    i=0
-    while i<len(readlines):
-        line = readlines[i]
+
+
+def _fix_source_zlib(lines: list[str]) -> None:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         #zlib merge
-        if 'configuration_table[0].func = & deflate_stored;' in line:
-            i = i + 1
-        if 'configuration_table[1].func = & deflate_fast;' in line:
-            i = i + 1
-        if 'configuration_table[2].func = & deflate_fast;' in line:
-            i = i + 1
-        if 'configuration_table[3].func = & deflate_fast;' in line:
-            i = i + 1
-        if 'configuration_table[4].func = & deflate_slow;' in line:
-            i = i + 1
-        if 'configuration_table[5].func = & deflate_slow;' in line:
-            i = i + 1
-        if 'configuration_table[6].func = & deflate_slow;' in line:
-            i = i + 1
-        if 'configuration_table[7].func = & deflate_slow;' in line:
-            i = i + 1
-        if 'configuration_table[8].func = & deflate_slow;' in line:
-            i = i + 1
-        if 'configuration_table[9].func = & deflate_slow;' in line:
-            i = i + 1
-
-        # freetype merge
-        if 'ft_raccess_guess_table[5].func = & raccess_guess_vfat;' in line:
-            i = i + 1
-        if 't1cid_driver_class.load_glyph = & cid_slot_load_glyph;' in line:
-            i = i + 1
-        if 't1_driver_class.attach_file = & T1_Read_Metrics;' in line:
-            i = i + 1
-        if 'sfnt_interface.load_sbit_image = & tt_face_load_sbit_image;' in line:
-            i = i + 1
-        if 'sfnt_interface.load_eblc = & tt_face_load_eblc;' in line:
-            i = i + 1
-        if 'sfnt_interface.free_eblc = & tt_face_free_eblc;' in line:
-            i = i + 1
-        if 'tt_service_gx_multi_masters.set_mm_blend = (FT_Error (*)(FT_Face face , FT_UInt num_coords ,' in line:
-            i = i + 1
-
+        if re.search(r"configuration_table\[\d+]\.func = & deflate_(stored|slow|fast);", line):
+            lines.pop(i)
         #zlib copy
         if 'extern FILE *tmpfile(void)  __attribute__((__malloc__(fclose,1), __malloc__)) ;\n' in line:
-            i = i + 1
+            lines.pop(i)
 
+def _fix_source_lz4(lines: list[str]) -> None:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         #lz4 merge
         if 'void __attribute__((__visibility__("default")))  merge_dummy_return' in line:
-            line = line.replace('void ', '')
+            lines[i] = line.replace('void ', '')
 
-        #minilua virtualize
-        if ('__attribute__((__malloc__(fclose,1),\n' in readlines[i + 1]) and (readlines[i + 2] == '__malloc__)) ;\n'):
-            i = i + 2
-        if ('__attribute__((__malloc__(pclose,1),\n' in readlines[i + 1]) and (readlines[i + 2] == '__malloc__)) ;\n'):
-            i = i + 2
 
-        #minilua merge
-        if ('extern FILE *tmpfile(void)  __asm__("tmpfile64") __attribute__((__malloc__(fclose,1),\n' in readlines[i+1]) \
-                and ('__malloc__)) ;\n' in readlines[i+2]):
-            i = i + 2
-
-        if ('extern FILE *fopen(char const   * __restrict  __filename , char const   * __restrict  __modes )  '
-            '__asm__("fopen64") __attribute__((__malloc__(fclose,1),\n' in readlines[i+1]) and ('__malloc__)) ;\n' in
-                                                                                                readlines[i+2]):
-            i = i + 2
-
-        if ('void __attribute__((__visibility__("internal")))  merge_dummy_return' in readlines[i+1]):
-            i = i + 1
-
+def _fix_source_sqlite(lines: list[str]) -> None:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         #sqlite virtualize
-        if '    *((void __attribute__((__overloaded__))  *)(' in readlines[i+1]:
-            i = i + 2
+        if '    *((void __attribute__((__overloaded__))  *)(' in line:
+            del lines[i-1:i+1] # remove previous and current one
 
         #sqlite flatten
         if ('extern  __attribute__((__nothrow__)) FILE *( __attribute__((__leaf__)) open_memstream)(char **__bufloc ,\n'
-            in readlines[i+1]) and ('size_t *__sizeloc )  __attribute__((__malloc__(fclose,1),\n' in readlines[i+2]) and\
-                ('__malloc__)) ;\n' in readlines[i+3]):
-            i = i + 3
+            in lines[i+1]) and ('size_t *__sizeloc )  __attribute__((__malloc__(fclose,1),\n' in lines[i+2]) and\
+                ('__malloc__)) ;\n' in lines[i+3]):
+            del lines[i:i+3]
 
         if ('extern FILE *fopen(char const   * __restrict  __filename , char const   * __restrict  __modes )  '
-            '__asm__("fopen64") __attribute__((__malloc__(fclose,1),\n' in readlines[i+1]) and ('__malloc__)) ;\n'
-                                                                                                in readlines[i+2]):
-            i = i + 2
+            '__asm__("fopen64") __attribute__((__malloc__(fclose,1),\n' in lines[i+1]) and ('__malloc__)) ;\n'
+                                                                                                in lines[i+2]):
+            del lines[i:i+2]
 
         if ('extern  __attribute__((__nothrow__)) FILE *( __attribute__((__leaf__)) fopencookie)(void * __restrict  '
-            '__magic_cookie ,\n' in readlines[i+1]) and ('char const   * __restrict  __modes ,\n' in readlines[i+2]) \
-                and ('cookie_io_functions_t __io_funcs )  __attribute__((__malloc__(fclose,1),\n' in readlines[i+3]) \
-                and ('__malloc__)) ;\n' in readlines[i+4]):
-            i = i + 4
+            '__magic_cookie ,\n' in lines[i+1]) and ('char const   * __restrict  __modes ,\n' in lines[i+2]) \
+                and ('cookie_io_functions_t __io_funcs )  __attribute__((__malloc__(fclose,1),\n' in lines[i+3]) \
+                and ('__malloc__)) ;\n' in lines[i+4]):
+            del lines[i:i+4]
 
-        if ('extern  __attribute__((__nothrow__)) FILE *( __attribute__((__leaf__)) fmemopen)(void *__s ,\n' in readlines[i+1]) \
-            and ('size_t __len ,\n' in readlines[i+2]) and ('char const   *__modes )  __attribute__((__malloc__(fclose,1),\n' in readlines[i+3]) \
-            and ('__malloc__)) ;\n' in readlines[i+4]):
-            i = i + 4
+        if ('extern  __attribute__((__nothrow__)) FILE *( __attribute__((__leaf__)) fmemopen)(void *__s ,\n' in lines[i+1]) \
+            and ('size_t __len ,\n' in lines[i+2]) and ('char const   *__modes )  __attribute__((__malloc__(fclose,1),\n' in lines[i+3]) \
+            and ('__malloc__)) ;\n' in lines[i+4]):
+            del lines[i:i+4]
 
-        if 'extern FILE *tmpfile64(void)  __attribute__((__malloc__(fclose,1), __malloc__)) ;\n' in readlines[i+1]:
-            i = i + 1
+        if 'extern FILE *tmpfile64(void)  __attribute__((__malloc__(fclose,1), __malloc__)) ;\n' in lines[i+1]:
+            del lines[i:i+1]
 
         if ('extern FILE *fopen64(char const   * __restrict  __filename , char const   * __restrict  __modes )  '
-            '__attribute__((__malloc__(fclose,1),\n' in readlines[i+1]) and ('__malloc__)) ;\n' in readlines[i+2]):
-            i = i + 2
+            '__attribute__((__malloc__(fclose,1),\n' in lines[i+1]) and ('__malloc__)) ;\n' in lines[i+2]):
+            del lines[i:i+2]
 
-        if ('extern  __attribute__((__nothrow__)) void *( __attribute__((__warn_unused_result__,\n' in readlines[i+1]) and\
-                ('__leaf__)) realloc)(void *__ptr , size_t __size )  __attribute__((__alloc_size__(2))) ;\n' in readlines[i+2]):
-            i = i + 2
+        if ('extern  __attribute__((__nothrow__)) void *( __attribute__((__warn_unused_result__,\n' in lines[i+1]) and\
+                ('__leaf__)) realloc)(void *__ptr , size_t __size )  __attribute__((__alloc_size__(2))) ;\n' in lines[i+2]):
+            del lines[i:i+2]
 
-        if ('extern  __attribute__((__nothrow__)) void *( __attribute__((__warn_unused_result__,\n' in readlines[i+1]) and\
-                ('__leaf__)) reallocarray)(void *__ptr , size_t __nmemb , size_t __size )  __attribute__((__malloc__(__builtin_free,1),\n' in readlines[i+2]) and\
-                ('__malloc__(reallocarray,1), __alloc_size__(2,3))) ;\n' in readlines[i+3]):
-            i = i + 3
+        if ('extern  __attribute__((__nothrow__)) void *( __attribute__((__warn_unused_result__,\n' in lines[i+1]) and\
+                ('__leaf__)) reallocarray)(void *__ptr , size_t __nmemb , size_t __size )  __attribute__((__malloc__(__builtin_free,1),\n' in lines[i+2]) and\
+                ('__malloc__(reallocarray,1), __alloc_size__(2,3))) ;\n' in lines[i+3]):
+            del lines[i:i+3]
 
-        if ('extern  __attribute__((__nothrow__)) FILE *( __attribute__((__leaf__)) fdopen)(int __fd ,\n' in readlines[i+1]) \
-                and ('char const   *__modes )  __attribute__((__malloc__(fclose,1),\n' in readlines[i+2]) \
-                and ('__malloc__)) ;\n' in readlines[i+3]):
-            i = i + 3
+        if ('extern  __attribute__((__nothrow__)) FILE *( __attribute__((__leaf__)) fdopen)(int __fd ,\n' in lines[i+1]) \
+                and ('char const   *__modes )  __attribute__((__malloc__(fclose,1),\n' in lines[i+2]) \
+                and ('__malloc__)) ;\n' in lines[i+3]):
+            del lines[i:i+3]
 
-        #freetype split
-        if ('extern FILE *fopen(char const   * __restrict  __filename , char const   * __restrict  __modes ) \n' in readlines[i+1]) \
-                and ('__attribute__((__malloc__(fclose,1),\n' in readlines[i+2]) and ('__malloc__)) ;\n' in readlines[i+3]):
-            i = i + 3
+def _fix_source_minilua(lines: list[str]) -> None:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        #minilua virtualize
+        if ('__attribute__((__malloc__(fclose,1),\n' in lines[i + 1]) and (lines[i + 2] == '__malloc__)) ;\n'):
+            del lines[i:i+2]
+        if ('__attribute__((__malloc__(pclose,1),\n' in lines[i + 1]) and (lines[i + 2] == '__malloc__)) ;\n'):
+            del lines[i:i+2]
+
+        #minilua merge
+        if ('extern FILE *tmpfile(void)  __asm__("tmpfile64") __attribute__((__malloc__(fclose,1),\n' in lines[i+1]) \
+                and ('__malloc__)) ;\n' in lines[i+2]):
+            del lines[i:i+2]
 
         if ('extern FILE *fopen(char const   * __restrict  __filename , char const   * __restrict  __modes )  '
-            '__attribute__((__malloc__(fclose,1),\n' in readlines[i+1]) and ('__malloc__)) ;\n' in readlines[i+2]):
-            i = i + 2
-        #TODO check if ok
-        i=i+1
-        fixed_readlines.append(line)
+            '__asm__("fopen64") __attribute__((__malloc__(fclose,1),\n' in lines[i+1]) and ('__malloc__)) ;\n' in
+                                                                                                lines[i+2]):
+            del lines[i:i+2]
 
-    file_contents.close()
-    fixed_contents.close()
-    pathlib.unlink(file)
-    final_path = Path(fixed_file).rename('.fixed.c', '.c')
-    return final_path
+        if 'void __attribute__((__visibility__("internal")))  merge_dummy_return' in lines[i+1]:
+            del lines[i:i+1]
+
+
+def _fix_source_freetype(lines: list[str]) -> None:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        # freetype merge
+        if 'ft_raccess_guess_table[5].func = & raccess_guess_vfat;' in line:
+            lines.pop(i)
+        if 't1cid_driver_class.load_glyph = & cid_slot_load_glyph;' in line:
+            lines.pop(i)
+        if 't1_driver_class.attach_file = & T1_Read_Metrics;' in line:
+            lines.pop(i)
+        if 'sfnt_interface.load_sbit_image = & tt_face_load_sbit_image;' in line:
+            lines.pop(i)
+        if 'sfnt_interface.load_eblc = & tt_face_load_eblc;' in line:
+            lines.pop(i)
+        if 'sfnt_interface.free_eblc = & tt_face_free_eblc;' in line:
+            lines.pop(i)
+        if 'tt_service_gx_multi_masters.set_mm_blend = (FT_Error (*)(FT_Face face , FT_UInt num_coords ,' in line:
+            lines.pop(i)
+
+        #freetype split
+        if ('extern FILE *fopen(char const   * __restrict  __filename , char const   * __restrict  __modes ) \n' in lines[i+1]) \
+                and ('__attribute__((__malloc__(fclose,1),\n' in lines[i+2]) and ('__malloc__)) ;\n' in lines[i+3]):
+            del lines[i:i+3]
+
+        if ('extern FILE *fopen(char const   * __restrict  __filename , char const   * __restrict  __modes )  '
+            '__attribute__((__malloc__(fclose,1),\n' in lines[i+1]) and ('__malloc__)) ;\n' in lines[i+2]):
+            del lines[i:i+2]
+
+
+def tigress_fixup(project: Project, file: Path) -> bool:
+    # Read lines
+    lines = open(file, "r").readlines()
+
+    # Apply the right fixups depending on the project
+    match project:
+        case Project.ZLIB:
+            _fix_source_zlib(lines)
+        case Project.LZ4:
+            _fix_source_lz4(lines)
+        case Project.FREETYPE:
+            _fix_source_freetype(lines)
+        case Project.SQLITE:
+            _fix_source_sqlite(lines)
+        case Project.MINILUA:
+            _fix_source_minilua(lines)
+
+    # Write-back the file
+    open(file, "w").writelines(lines)
+    return True
 
 
 def _get_funs_to_obfuscate(sample: Sample, obf_level, seed: int) -> list[str]:
@@ -258,3 +268,21 @@ def get_merge_parameters(sample: Sample, obf_level: int):
         params.append(f"--Functions={','.join(tup)}")
     # params.pop(0)  # remove first Transform merge as it will be added by the run_tigress command
     return params
+
+
+def compile_tigress(sample: Sample) -> bool:
+    args = [
+        f"{sample.compiler.value}",
+        f"-{sample.optimization.value}",
+        "-D", '__DATE__="1970-01-01"',
+        '-D', '__TIME__="00:00:00"',
+        '-D', '__TIMESTAMP__="1970-01-01 00:00:00"',
+        "-frandom-seed=123",
+        "-fno-guess-branch-probability",
+        "-lm",
+        "-o", f"{sample.binary_file}",
+        f"{sample.source_file}"
+    ]
+    p = subprocess.Popen(args, stdin=None, stdout=None, stderr=None)
+    output, err = p.communicate()
+    return p.returncode == 0

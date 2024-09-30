@@ -3,11 +3,12 @@ from typing import Iterable
 import zipfile
 import logging
 import json
+import subprocess
 
 # from obfu_dataset import get_download_link
 from obfu_dataset.obfuscators import supported_passes
-from obfu_dataset.obfuscators.ollvm import OLLVM_PASS
-from obfu_dataset.obfuscators.tigress import TIGRESS_PASS
+from obfu_dataset.obfuscators.ollvm import OLLVM_PASS, compile_ollvm
+from obfu_dataset.obfuscators.tigress import TIGRESS_PASS, compile_tigress
 from obfu_dataset.types import Project, Obfuscator, ObPass, Sample, \
                                Compiler, Architecture, OptimLevel, BinaryType, \
                                SEED_NUMBER, AVAILABLE_LEVELS
@@ -182,9 +183,29 @@ class ObfuDataset(object):
     def compile(self, sample: Sample) -> bool:
         match sample.type:
             case BinaryType.PLAIN:
-                pass
-                # TODO: todo
+                return self._simple_compilation(sample)
             case BinaryType.OBFUSCATED:
-                pass
-                # TODO
+                match sample.obfuscator:
+                    case Obfuscator.TIGRESS:
+                        return compile_tigress(sample)
+                    case Obfuscator.OLLVM:
+                        return compile_ollvm(sample)
 
+
+    @staticmethod
+    def _simple_compilation(sample: Sample) -> bool:
+        args = [
+            f"{sample.compiler.value}",
+            f"-{sample.optimization.value}",
+            "-D", '__DATE__="1970-01-01"',
+            '-D', '__TIME__="00:00:00"',
+            '-D', '__TIMESTAMP__="1970-01-01 00:00:00"',
+            "-frandom-seed=123",
+            "-fno-guess-branch-probability",
+            "-lm",
+            "-o", f"{sample.binary_file}",
+            f"{sample.source_file}"
+        ]
+        p = subprocess.Popen(args, stdin=None, stdout=None, stderr=None)
+        output, err = p.communicate()
+        return p.returncode == 0

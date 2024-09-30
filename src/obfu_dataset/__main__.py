@@ -38,11 +38,14 @@ from obfu_dataset.types import Project, Obfuscator, ObPass, OptimLevel, Architec
 from obfu_dataset.dataset import ObfuDataset
 from obfu_dataset.obfuscators.ollvm import OLLVM_PASS, gen_ollvm_annotated_source
 from obfu_dataset.obfuscators.tigress import TIGRESS_PASS, check_tigress_environ, run_tigress, get_merge_parameters, \
-                                             get_mix1_parameters, get_mix2_parameters
+                                             get_mix1_parameters, get_mix2_parameters, tigress_fixup
 
 PROJ_OPT = [x.value for x in Project]
 OBF_OPT = [x.value for x in Obfuscator]
 PASS_OPT = [x.value for x in ObPass]
+BINT_OPT = [x.value for x in BinaryType]
+COMPILER_OPT = [x.value for x in Compiler]
+OPTIM_OPT = [x.value for x in OptimLevel]
 
 OBFU_PASSES = {
     Obfuscator.TIGRESS: TIGRESS_PASS,
@@ -294,8 +297,7 @@ def download_all(root: str, threads: int):
 
 @main.command(name="create")
 @click.option('-r', "--root", type=click.Path(), required=True, help='Dataset root directory')
-@click.option('-ida_s', "--ida_script", type=click.Path(), required=True, help='IDA script for extracting candidate functions to obfuscation')
-def create(root, ida_script):
+def create(root):
     console = Console()
 
     if not check_tigress_environ():
@@ -340,6 +342,11 @@ def create(root, ida_script):
                     else:
                         console.print(f"tigress execution failed for {output_path}")
 
+                    if tigress_fixup(proj, output_path):
+                        console.print(f"Tigress fixup: {output_path} [OK]")
+                    else:
+                        console.print(f"Tigress fixup: {output_path} [KO]")
+
                             
     #OLLVM source generation
     for proj in Project:
@@ -360,58 +367,52 @@ def create(root, ida_script):
 
 @main.command(name="compile")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
-@click.option('-ollvm', type=click.Path(), required=True, help='Path to OLLVM')
-def compile(root, ollvm_dir):
-    # Tigress
-    # 1) Apply a fixup for Tigress .c files that do not compile when necessary 
-    # 2) Compile
-    for proj in Project:
-        tigress_path = Path(root) / "tigress"
-        all_binaries = Path(tigress_path).glob("*")
-        for file in all_binaries:
-            file = tigress_fixup(file)
-            for optim in OptimLevel:
-                output_bin = file.rename('.c', '') + '_' + optim.value + '.exe'
-                match proj.value:
-                    case "zlib" | "lz4" | "freetype" | "sqlite":
-                        cmd = ['gcc', optim.value, '-D', '__DATE__="1970-01-01"', '-D' '__TIME__="00:00:00"', '-D',  '__TIMESTAMP__="1970-01-01 00:00:00"', '-frandom-seed=123', '-fno-guess-branch-probability', '-o', output_bin]
-                    case "minilua":
-                        cmd = ['gcc', optim.value, '-D', '__DATE__="1970-01-01"', '-D', '__TIME__="00:00:00"', '-D', '__TIMESTAMP__="1970-01-01 00:00:00"', '-frandom-seed=123', '-fno-guess-branch-probability', '-o', output_bin, '-lm']
-                p = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-                output, err = p.communicate()
-                rc = p.returncode
-                logging.info('Tigress file:', file, 'was compiled with return code:', rc)
-            
-    #OLLVM
-    use_ollvm14 = False
-    if 'bruno' in ollvm_dir: #TODO
-        use_ollvm14 = True
-    
-    for proj in Project:
-        ollvm_path = Path(root) / "ollvm"
-        all_binaries = Path(ollvm_path).glob('*')
-        for file in all_binaries:
-            for optim in OptimLevel:
-                output_bin = file.rename('.c', '') + '_' + optim.value + '.exe'
-                if use_ollvm14:
-                    match proj.value:
-                        case "zlib" | "lz4" | "freetype" | "sqlite":
-                            cmd = [ollvm_dir + '_build/bin/clang', optim.value, '-D', '__DATE__="1970-01-01"', '-D', '__TIME__="00:00:00"', '-D', '__TIMESTAMP__="1970-01-01 00:00:00"', '-frandom-seed=123', '-o', output_bin, file, '-fpass-plugin=' + ollvm_dir + '_build/lib/Ollvm.so', '-Xclang', '-load', '-Xclang', ollvm_dir + '_build/lib/Ollvm.so']
-                            
-                        case "minilua":
-                            cmd = [ollvm_dir + '_build/bin/clang', optim.value, '-lm', '-D', '__DATE__="1970-01-01"', '-D', '__TIME__="00:00:00"', '-D', '__TIMESTAMP__="1970-01-01 00:00:00"', '-frandom-seed=123', '-o', output_bin, file, '-fpass-plugin=' + ollvm_dir + '_build/lib/Ollvm.so', '-Xclang', '-load', '-Xclang', ollvm_dir + '_build/lib/Ollvm.so']
-                            
-                else:
-                    match proj.value:
-                        case "zlib" | "lz4" | "freetype" | "sqlite":
-                            cmd = [ollvm_dir + '/build/bin/clang', file, '-o', output_bin] #Because there are pragma directly inside file, no need to call -mllvm
-                        case "minilua":
-                            cmd = [ollvm_dir + '/build/bin/clang', file, '-o', output_bin, '-lm'] #Because there are pragma directly inside file, no need to call -mllvm
-                            
-                p = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-                output, err = p.communicate()
-                rc = p.returncode
-                logging.info('OLLVM file:', file, 'was compiled with return code:', rc)
+@click.option("-p", "--project", type=click.Choice(PROJ_OPT), required=False, default=None, help="Project to download")
+@click.option("-t", "--type", type=click.Choice(BINT_OPT), required=True, help="Type to compile")
+@click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
+@click.option("-c", "--compiler", type=click.Choice(COMPILER_OPT), default=None, required=False, help="Compiler to use")
+@click.option("--optim", type=click.Choice(OPTIM_OPT), default=None, required=False, help="Optimization level")
+@click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
+def compile(root: str, proj: str, typ: str, obf: str, compiler: str, optim: str, threads: int):
+    """
+    Compile both plain and obfuscated binaries. OLLVM path and additional parameters should be given
+    through environment variables:
+    * OLLVM_PATH=/home/foo/build/
+    * OLLVM_ARGS="-fpass-plugin=/home/foo/_build/lib/Ollvm.so -Xclang -load -Xclang home/foo/_build/lib/Ollvm.so"
+
+    :param root: Dataset root
+    :param ollvm_dir: directory where OLLVM is located
+    :return:
+    """
+    console = Console()
+
+    projects = [Project(proj)] if proj else list(Project)
+    obfuscators = [Obfuscator(obf)] if obf else list(Obfuscator)
+    compilers = [Compiler(compiler)] if compiler else list(Compiler)
+    optims = [OptimLevel(optim)] if optim else list(OptimLevel)
+
+    if Obfuscator.OLLVM in obfuscators:
+        if "OLLVM_PATH" not in os.environ:
+            print("OLLVM_PATH environment variable should be provided to compile with OLLVM")
+            sys.exit(1)
+
+    dataset = ObfuDataset(root)
+
+    # Get the list of samples to compile
+    typ = BinaryType(typ)
+    if typ == BinaryType.PLAIN:
+        samples = list(dataset.iter_plain_samples(projects, compilers, optims))
+    elif typ == BinaryType.OBFUSCATED:
+        samples = list(dataset.iter_obfuscated_samples(projects, obfuscators, compilers=compilers, optims=optims))
+    else:
+        assert False
+
+    for sample in samples:
+        print(f"compile sample: {sample.binary_file.name}")
+        if dataset.compile(sample):
+            console.log(f":white_check_mark: {sample.binary_file} compiled")
+        else:
+            console.log(f":cross_mark: {sample.binary_file} fail to compile")
 
 
 # @main.command(name="extract-symbols")

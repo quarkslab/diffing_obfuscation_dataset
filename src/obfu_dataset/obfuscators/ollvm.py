@@ -1,7 +1,9 @@
+import os
 import random
 import re
 from operator import attrgetter
 from random import Random
+import subprocess
 
 from obfu_dataset import ObPass, Sample
 from pathlib import Path
@@ -111,3 +113,27 @@ def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, o
         out.writelines(lines)
 
     return True
+
+
+def compile_ollvm(sample: Sample) -> bool:
+    ollvm_path = Path(os.environ['OLLVM_PATH'])
+    ollvm_args = os.environ.get("OLLVM_ARGS")
+    if ollvm_path.name != "clang":
+        ollvm_path = ollvm_path / "clang"
+
+    args = [str(ollvm_path),
+            f"{sample.optimization.value}",
+            "-lm",
+            "-D", '__DATE__="1970-01-01"',
+            '-D', '__TIME__="00:00:00"',
+            '-D', '__TIMESTAMP__="1970-01-01 00:00:00"',
+            "-frandom-seed=123",
+            "-fno-guess-branch-probability",
+            "-lm",
+            "-o", f"{sample.binary_file}",
+            f"{sample.source_file}"
+    ] + ollvm_args.split(" ")
+
+    p = subprocess.Popen(args, stdin=None, stdout=None, stderr=None)
+    output, err = p.communicate()
+    return p.returncode == 0
