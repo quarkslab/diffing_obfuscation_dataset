@@ -13,6 +13,7 @@ import signal
 import hashlib
 from subprocess import PIPE
 import tempfile
+import sys
 
 # third-party libraries
 from idascript import MultiIDA, iter_binary_files, IDA
@@ -32,16 +33,21 @@ from rich.progress import (
 
 from obfu_dataset.types import BinaryType
 # local imports
-from obfu_dataset import get_download_link
+from obfu_dataset import get_download_link, DownloadLink
 from obfu_dataset.types import Project, Obfuscator, ObPass, OptimLevel, Architecture, Compiler
 from obfu_dataset.dataset import ObfuDataset
 from obfu_dataset.obfuscators.ollvm import OLLVM_PASS
-from obfu_dataset.obfuscators.tigress import TIGRESS_PASS
-
+from obfu_dataset.obfuscators.tigress import TIGRESS_PASS, check_tigress_environ, run_tigress, get_merge_parameters, \
+                                             get_mix1_parameters, get_mix2_parameters
 
 PROJ_OPT = [x.value for x in Project]
 OBF_OPT = [x.value for x in Obfuscator]
 PASS_OPT = [x.value for x in ObPass]
+
+OBFU_PASSES = {
+    Obfuscator.TIGRESS: TIGRESS_PASS,
+    Obfuscator.OLLVM: OLLVM_PASS
+}
 
 SEED_NUMBER = 10
 SPLIT_COUNT = 2
@@ -121,62 +127,68 @@ def ls(root: str):
 
 def download_one_package(progress: Progress,
                          dataset: ObfuDataset,
-                         typ: BinaryType,
-                         project: Project,
-                         obfuscator: Obfuscator | None):#, path: str) -> None:
+                         package: DownloadLink):#, path: str) -> None:
     """Copy data from a url to a local file."""
-    # progress.console.log(f"Processing task[{task_id}]: {project.value}")
+    # progress.console.log(f"Processing package: {package}")
 
-    package = get_download_link(project, BinaryType.PLAIN)
-    # print(package.size, type(package.size))
-    # progress.update(task_id, total=package.size, visible=True)
-
-    try:
-        response = urlopen(package.link)
-    except URLError as e:
-        progress.console.log(f":cross_mark: {project.value} failed: {str(e)}")
-        return
-
-    # Use effective size except than one provided in links.json
-    size = int(response.info()["Content-length"])
-
-    task_id = progress.add_task("download",
-                                filename=f"{project.value}",
-                                start=True,
-                                visible=True,
-                                total=size)
-
-
+    pname = package.project.name
     filepath = Path(tempfile.gettempdir()) / package.link.split("/")[-1]
-    hash = hashlib.md5()
 
-    with open(filepath, "wb") as dest_file:
-        # progress.start_task(task_id)
-        for data in iter(partial(response.read, 32768), b""):
-            hash.update(data)
-            dest_file.write(data)
-            progress.update(task_id, advance=len(data))
-            if done_event.is_set():
-                return
+    if filepath.exists():
+        progress.console.log(f"found .zip in cache: {filepath}")
 
-    # When download finished
-    progress.remove_task(task_id)
-    progress.console.log(f":white_check_mark: {project.value} downloaded in: {filepath}")
+    else:
+        # Try to download it
+        try:
+            response = urlopen(package.link)
+        except URLError as e:
+            progress.console.log(f":cross_mark: {pname} failed: {str(e)}")
+            return
 
-    # Check hash
-    h = hash.hexdigest()
-    if h != package.hash:
-        print(package)
-        progress.console.log(f":cross_mark: {filepath.name} invalid hash: {h} (expected: {package.hash})")
-        return
+        # Use effective size except than one provided in links.json
+        size = int(response.info()["Content-length"])
+
+        task_id = progress.add_task("download",
+                                    filename=f"{pname}",
+                                    start=True,
+                                    visible=True,
+                                    total=size)
+
+        hash = hashlib.md5()
+
+        with open(filepath, "wb") as dest_file:
+            # progress.start_task(task_id)
+            for data in iter(partial(response.read, 32768), b""):
+                hash.update(data)
+                dest_file.write(data)
+                progress.update(task_id, advance=len(data))
+                if done_event.is_set():
+                    return
+
+        # When download finished
+        progress.remove_task(task_id)
+        progress.console.log(f":white_check_mark: {pname} downloaded in temporary dir: {filepath}")
+
+        # Check hash
+        h = hash.hexdigest()
+        if h != package.hash:
+            print(package.link)
+            progress.console.log(f":cross_mark: {filepath.name} invalid hash: {h} (expected: {package.hash})")
+
 
     # Send the zip to the dataset for extraction
-    if typ == BinaryType.PLAIN:
-        res = dataset.add_source_zip(project, filepath)
+    if package.type == BinaryType.PLAIN:
+        res = dataset.add_source_zip(package.project, filepath)
     else:
-        res = dataset.add_obfuscated_zip(project, obfuscator, filepath)
+        res = dataset.add_obfuscated_zip(
+            package.project,
+            package.obfuscator,
+            package.obpass,
+            filepath)
 
-    if not res:
+    if res:
+        progress.console.log(f":white_check_mark: {filepath.name} extracted in: {res}")
+    else:
         progress.console.log(f":cross_mark: {filepath.name} zip extraction failed")
 
     # in either case remove file
@@ -197,13 +209,13 @@ def download_packages(root: str,
 
     # Get the list of all packages to download
     if type == BinaryType.PLAIN:
-        packages = [(get_download_link(x, BinaryType.PLAIN), x, None) for x in projects]
+        packages = [get_download_link(x, BinaryType.PLAIN) for x in projects]
     else:
         packages = []
         for project in projects:
             for obfuscator in obfuscators:
-                for opass in obpasses:
-                    packages.append((get_download_link(project, BinaryType.OBFUSCATED, obfuscator, opass), project, obfuscator))
+                for opass in (x for x in obpasses if x in OBFU_PASSES[obfuscator]):
+                    packages.append(get_download_link(project, BinaryType.OBFUSCATED, obfuscator, opass))
 
     # Instanciate a progress bar
     progress = Progress(
@@ -219,7 +231,7 @@ def download_packages(root: str,
     )
 
     # Check disk availability
-    exp_size = sum(x[0].size for x in packages)
+    exp_size = sum(x.size for x in packages)
     info = shutil.disk_usage(root)
     ppe, ppi = convert_size(exp_size), convert_size(info.free)
     if exp_size > info.free:
@@ -233,11 +245,13 @@ def download_packages(root: str,
     dataset = ObfuDataset(root)
 
     with progress:
-        with ThreadPoolExecutor(max_workers=threads) as pool:
-            for package, proj, obfu in packages:
-                # copy_url(progress, task_id, project)
-                pool.submit(download_one_package, progress, dataset, type, proj, obfu)
-            # progress.console.log("all tasks submitted !")
+        if threads > 1:
+            with ThreadPoolExecutor(max_workers=threads) as pool:
+                for package in packages:
+                    pool.submit(download_one_package, progress, dataset, package)
+        else:
+            for package in packages:
+                download_one_package(progress, dataset, package)
 
 
 
@@ -282,91 +296,68 @@ def download_all(root: str, threads: int):
 @click.option('-r', "--root", type=click.Path(), required=True, help='Dataset root directory')
 @click.option('-ida_s', "--ida_script", type=click.Path(), required=True, help='IDA script for extracting candidate functions to obfuscation')
 def create(root, ida_script):
-    #Check if Tigress is available
-    if (not 'TIGRESS_HOME' in os.environ) and (shutil.which('tigress') is None):
-        logging.ERROR('Tigress does not seem to be installed on your system. Please install it or register the TIGRESS_HOME environment variable.')
-        exit()
+    console = Console()
+
+    if not check_tigress_environ():
+        console.print("Tigress does not seem to be installed on your system.\n"
+                      "Please install it or register the TIGRESS_HOME environment variable.")
+        sys.exit(1)
 
     dataset = ObfuDataset(root)
     
     #Tigress source generation
     for proj in Project:
-        src_dir = Path(dataset.root_path) / (proj.value + "/sources/")
-        if not src_dir.exists():
-            dataset.download_plain(proj)
-        src_candidate = [f for f in src_dir.iterdir() if f.suffix == '.c']
-        assert len(src_candidate) == 1
-        src_file = src_candidate[0]
-        for obf in ObPass:
-            obf_path = Path(dataset.root_path) / proj.value / "obfuscated" / "tigress" / obf.value
+        sample = dataset.get_plain_sample(proj)
+        src_file = dataset.get_src_path(proj) / proj.value+".c"
+        if not src_file.exists():
+            console.print("projects sources have to be downloaded first")
+            sys.exit(1)
+
+        for obf in TIGRESS_PASS:
+            obf_path = dataset.get_obfu_path(proj, Obfuscator.TIGRESS, obf)
+
             for obf_level in range(10, 101, 10):
                 level_path = obf_path / str(obf_level)
                 level_path.mkdir(parents=True, exist_ok=True)
                 for seed in range(1, SEED_NUMBER+1):
-                    output_path = level_path / (proj.value + '_tigress_gcc_x64_' + obf.value + '_' + str(obf_level) + '_' + str(seed) + '.c')
+
+                    output_path = level_path / f"{proj.value}_{Obfuscator.TIGRESS.value}_gcc_x64_{obf.value}_{obf_level}_{str(seed)}.c"
                     print('output path:', output_path)
-                    match obf.value:
-                        case "copy":
-                            cmd = ['tigress', '--Environment=x86_64:Linux:Gcc:4.6', '--Seed='+str(seed), '--Transform=Copy', '--Functions=%'+str(obf_level), '--out='+str(output_path), str(src_file)]
-                        
-                        case "merge":
-                            cmd = get_merge_command(dataset.root_path, proj.value, obf_level, seed, ida_script, output_path)
-                        case "split":
-                            cmd = ['tigress', '--Environment=x86_64:Linux:Gcc:4.6', '--Seed='+str(seed), '--Transform=Split', '--Functions=%'+str(obf_level), '--SplitKinds=deep,block,top', '--SplitCount='+str(SPLIT_COUNT), '--out='+str(output_path), str(src_file)]
-                           
-                        case "CFF":
-                            cmd = ['tigress', '--Environment=x86_64:Linux:Gcc:4.6', '--Seed='+str(seed), '--Transform=Flatten', '--Functions=%'+str(obf_level), '--out='+str(output_path), str(src_file)]
-                            
-                        case "opaque":
-                            cmd = ['tigress', '--Environment=x86_64:Linux:Gcc:4.6', '--Seed='+str(seed), '--Transform=InitOpaque', '--Functions=main', '--Transform=AddOpaque', '--Functions=%'+str(obf_level), '--out='+str(output_path), str(src_file)]
-                            
-                        case "virtualize":
-                            cmd = ['tigress', '--Environment=x86_64:Linux:Gcc:4.6', '--Seed='+str(seed), '--Transform=Virtualize', '--Functions=%'+str(obf_level), '--out='+str(output_path), str(src_file)]
-                            
-                        case "encodearith":
-                            cmd = ['tigress', '--Environment=x86_64:Linux:Gcc:4.6', '--Seed='+str(seed), '--Transform=EncodeArithmetic', '--Functions=%'+str(obf_level), '--out='+str(output_path), str(src_file)]
-                            
-                        case "encodeliteral":
-                            cmd = ['tigress', '--Environment=x86_64:Linux:Gcc:4.6', '--Seed='+str(seed), '--Transform=EncodeLiterals', '--Functions=%'+str(obf_level), '--out='+str(output_path), str(src_file)]
-                            
-                        case "mix-1":
-                            cmd = get_mix1_command(dataset.root_path, proj.value, obf_level, seed, ida_script,
-                                                   output_path)
 
-                        case "mix-2":
-                            cmd = get_mix2_command(dataset.root_path, proj.value, obf_level, seed, ida_script,
-                                                   output_path)
+                    match obf:
+                        case ObPass.MERGE:
+                            params = get_merge_parameters(sample, obf_level)
+                        case ObPass.CFF_ENCODEARITH_OPAQUE:
+                            params = get_mix1_parameters(sample, obf_level, seed)
+                        case ObPass.CFF_ENCODEARITH_OPAQUE_SPLIT:
+                            params = get_mix2_parameters(sample, obf_level, seed, SPLIT_COUNT)
+                        case _:
+                            params = []
+                    res = run_tigress(src_file, output_path, seed, obf, params, obf_level, split_count=SPLIT_COUNT)
 
-
-                    #Refine cmd with specific Tigress keywords if necessary
-                    if proj.value == 'minilua':
-                        additional_keywords = ['-D', '_Float128=double']
-                        cmd = cmd[0] + additional_keywords + cmd[1:]
-                    if proj.value == 'sqlite':
-                        additional_keywords = ['-D', '_Float64=double', '-D', '_Float128=double', '-D', '_Float32x=double', '-D', '_Float64x=double']
-                        cmd = cmd[0] + additional_keywords + cmd[1:]
-                    print('cmd:', cmd)
-                    #p = subprocess.Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-                    #output, err = p.communicate()
-                    #rc = p.returncode
-                    #logging.info('Tigress file:', output_path, 'was generated with return code:', rc)
+                    if res:
+                        console.print(f"Tigress file generated: {output_path}")
+                    else:
+                        console.print(f"tigress execution failed for {output_path}")
 
                             
     #OLLVM source generation
     for proj in Project:
-        src_dir = dataset.root / proj.value / "sources"
-        src_file = [f for f in src_dir.iterdir() if f.suffix == '.c'][0]
-        for obf in ObPass:
-            #Assert the pass is available for OLLVM
-            if obf in OLLVM_PASS:
-                obf_path = Path(dataset.root_path) / proj.value / "obfuscated" / "ollvm" / obf.value 
-                for obf_level in range(10, 101, 10):
-                    level_path = obf_path / str(obf_level)
-                    level_path.mkdir(parent=True)
-                    for seed in range(1, SEED_NUMBER+1):
-                        for optim in OptimLevel: 
-                            obfuscated_file = gen_ollvm_obfuscated(proj, obf, obf_level, seed, ida_script)
-                            logging.info('OLLVM file was generated at location:', obfuscated_file)
+        src_file = dataset.get_src_path(proj) / proj.value + ".c"
+        sample = dataset.get_plain_sample(proj)
+
+        for obf in OLLVM_PASS:
+            obf_path = dataset.get_obfu_path(proj, Obfuscator.OLLVM, obf)
+            for obf_level in range(10, 101, 10):
+                level_path = obf_path / str(obf_level)
+                level_path.mkdir(parent=True, exist_ok=True)
+                for seed in range(1, SEED_NUMBER+1):
+                    output_file = level_path / f"{proj.value}_{Obfuscator.OLLVM.value}_gcc_x64_{obf.value}_{obf_level}_{str(seed)}.c"
+                    if gen_ollvm_obfuscated(sample, output_file, obf, obf_level, seed):
+                        logging.info(f"OLLVM file was generated at location:{output_file}")
+                    else:
+                        logging.warning(f"OLLVM fail to generate: {output_file}")
+
 
 @main.command(name="compile")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")

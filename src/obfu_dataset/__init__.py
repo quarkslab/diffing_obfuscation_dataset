@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from .types import *
 from .dataset import ObfuDataset
+from .obfuscators import supported_passes
 
 __version__ = "0.1.0"
 
@@ -14,9 +15,13 @@ _precompiled = json.loads(PRECOMPILED_FILE.read_text())
 
 @dataclass
 class DownloadLink:
+    project: Project
+    type: BinaryType
     link: str
     size: int
     hash: str
+    obfuscator: Obfuscator | None = None
+    obpass: ObPass | None = None
 
 
 def get_download_link(project: Project,
@@ -25,9 +30,17 @@ def get_download_link(project: Project,
                       obpass: ObPass = None) -> DownloadLink|None:
     try:
         if type == BinaryType.PLAIN:
-            return DownloadLink(**_precompiled[project.value]["sources"])
+            raw_item = _precompiled[project.value]["sources"]
+            package = DownloadLink(**raw_item)
         elif type == BinaryType.OBFUSCATED:
-            item = _precompiled[project.value][type.value][obfuscator.value][obpass.value]
-            return DownloadLink(**item)
+            raw_item = _precompiled[project.value][type.value][obfuscator.value][obpass.value]
+            package = DownloadLink(**raw_item)
+            package.obfuscator = obfuscator
+            package.obpass = obpass
+        else:
+            assert False
+        package.project = Project(package.project)
+        package.type = BinaryType(package.type)
+        return package
     except KeyError:
         return None

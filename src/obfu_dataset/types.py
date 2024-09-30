@@ -1,8 +1,9 @@
+import json
 from pathlib import Path
 from enum import Enum, auto
 from dataclasses import dataclass
 
-SEED_NUMBER=10
+SEED_NUMBER = 10
 
 class BinaryType(Enum):
     PLAIN = "plain"
@@ -37,15 +38,15 @@ class Project(Enum):
 
 class Architecture(Enum):
     X86_64 = "X86_64"
-    ARM = "ARM"
-    AARCH64 = "Aarch64"
+    # ARM = "ARM"
+    # AARCH64 = "Aarch64"
 
 class OptimLevel(Enum):
     O0 = "-O0"
-    O1 = "-O1"
+    # O1 = "-O1"
     O2 = "-O2"
-    O3 = "-O3"
-    OS = "-OS"
+    # O3 = "-O3"
+    # OS = "-OS"
 
 
 NOT_EXISTING_BENCH = [
@@ -53,6 +54,19 @@ NOT_EXISTING_BENCH = [
     (Project.SQLITE, Obfuscator.TIGRESS, ObPass.MERGE),
     (Project.SQLITE, Obfuscator.TIGRESS, ObPass.OPAQUE),
     (Project.FREETYPE, Obfuscator.TIGRESS, ObPass.VIRTUALIZE)
+]
+
+AVAILABLE_LEVELS = [
+    10,
+    20,
+    30,
+    40,
+    50,
+    60,
+    70,
+    80,
+    90,
+    100
 ]
 
 '''
@@ -132,36 +146,48 @@ class Sample:
 
     @property
     def basename_bin(self) -> str:
-        '''
+        """
+        Return the name of a sample (without extension!)
+
         Name mangling for binaries:
             Plain : [project]_[compiler]_[archi]_[optim].exe
             Obfuscated : [project]_[obfuscator]_[compiler]_[archi]_[obfpass]_[level]_[seed]_[optim].exe
-        '''
+        """
         match self.type:
             case BinaryType.PLAIN:
-                return self.project + '_' + self.compiler + '_' + self.architecture + '_' + self.optimization
+                return (f"{self.project.value}_{self.compiler.value}_"
+                        f"{self.architecture.value}_{self.optimization.value}")
             case BinaryType.OBFUSCATED:
-                return self.project + '_' + self.obfuscator + '_' + self.compiler + '_' + self.architecture + '_' + self.obfpass + '_' + self.level + '_' + self.optimization
+                return (f"{self.project.value}_{self.obfuscator.value}_{self.compiler.value}_"
+                        f"{self.architecture.value}_{self.obfpass.value}_{self.level}_{self.optimization.value}")
+                        # FIXME(Roxane): Pourquoi on a pas la seed dans le nom du binaire ?
+
     @property
     def basename_src(self) -> str:
-        '''
+        """
+        Return the name a source file (without extension)
+
         Name mangling for src
             Plain : [project].c
             Obfuscated : [project]_[obfuscator]_[compiler]_[archi]_[obfpass]_[level]_[seed].c  #Including compiler and archi is meaningful for Tigress
-        '''
+        """
         match self.type:
             case BinaryType.PLAIN:
-                return self.project
+                return f"{self.project.value}"
             case BinaryType.OBFUSCATED:
-                return self.project + '_' + self.obfuscator + '_' + self.compiler + '_' + self.architecture + '_' + self.obfpass + '_' + self.level + '_' + self.seed
+                return (f"{self.project.value}_{self.obfuscator.value}_{self.compiler.value}_"
+                       f"{self.architecture.value}_{self.obfpass.value}_{self.level}_{self.seed}")
 
     @property
     def base_dir(self) -> Path:
+        """
+        Return the base directory for the sample (whether its a source or a binary one)
+        """
         match self.type:
             case BinaryType.PLAIN:
                 return self.root_path / self.project.value / "sources"
             case BinaryType.OBFUSCATED:
-                obfu_p = self.root_path / self.project.value / "obfuscated"
+                obfu_p: Path = self.root_path / self.project.value / "obfuscated"
                 obfu_p = obfu_p / self.obfuscator.value / self.obfpass.value
                 return obfu_p / str(self.level)
 
@@ -185,9 +211,9 @@ class Sample:
     def symbols_file(self) -> Path:
         return self.base_dir / (self.basename_bin + ".json")
 
-    def is_downloaded(self) -> bool:
-        return self.base_dir.exists()
+    def get_symbols(self) -> dict[int, str]:
+        return json.loads(self.symbols_file.read_text())
 
     @property
     def exists(self) -> bool:
-        return self.base_dir.exists() and self.binary_file.exists()
+        return self.source_file.exists()

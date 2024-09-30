@@ -23,6 +23,17 @@ def main():
     pass
 
 
+def make_zip_name(project: Project,
+                  type: BinaryType,
+                  obfuscator: Obfuscator = None,
+                  obpass: ObPass = None):
+    match type:
+        case BinaryType.PLAIN:
+            return f"{project.value}-sources.zip"
+        case BinaryType.OBFUSCATED:
+            return f"{project.value}_{obfuscator.value}_{obpass.value}.zip"
+
+
 def get_info_remote_file(remote_path: str) -> tuple[str, int, str] | None:
     info = rclone.ls(remote_path)
     if info:
@@ -51,10 +62,10 @@ def mk_links(out: str):
     d = {}
     for project in Project:
         print(f"project: {project.value}")
-        # Create the source entry
 
-        # Get info from remote file
-        remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{project.value}/sources.zip"
+        # Create the source entry
+        zip_name = make_zip_name(project, BinaryType.PLAIN)
+        remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{project.value}/{zip_name}"
         url, size, hash = get_info_remote_file(remote_path)
 
         # Create DownloadLink object
@@ -67,9 +78,9 @@ def mk_links(out: str):
         for obfu in Obfuscator:
             d[project.value]['obfuscated'][obfu.value] = {}
             for obpass in supported_passes(obfu):
-
                 # Get info from remote file
-                remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{project.value}/obfuscated/{obfu.value}/{obpass.value}.zip"
+                zip_name = make_zip_name(project, BinaryType.OBFUSCATED, obfu, obpass)
+                remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{project.value}/obfuscated/{obfu.value}/{zip_name}"
                 url, size, hash = get_info_remote_file(remote_path)
                 # Create DownloadLink object
                 entry = DownloadLink(project, BinaryType.OBFUSCATED, url, size, hash, obfu, obpass)
@@ -79,11 +90,9 @@ def mk_links(out: str):
     # Write the resulting json file
     with open(out, "w") as f:
         json.dump(d, f, indent=2)
-    print("file written.")
 
 
 def make_source_zip(out_file, dir) -> None:
-    # FIXME: Should we exclude files ?
     base = Path(dir)
     with zipfile.ZipFile(out_file, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         #for root, dirs, files in base.walk():
@@ -97,7 +106,7 @@ def make_source_zip(out_file, dir) -> None:
 def make_obfuscation_zip(out_file, dir) -> None:
     # dir here is an obfu pass directory
     base = Path(dir)
-    rel = Path(base.parent.name)
+    rel = Path(base.name)
     with zipfile.ZipFile(out_file, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         for file_path in base.rglob("*"):
             #for file in files:
@@ -110,9 +119,10 @@ def make_obfuscation_zip(out_file, dir) -> None:
 @main.command(name="upload")
 @click.option("-p", "--project", type=click.Choice(PROJ_OPT), default=None, help="Project to download")
 @click.option("-t", "--type", type=click.Choice([x.value for x in BinaryType]), default=None, help="Type to upload")
-@click.option("--override", type=bool, default=False, help="Override remote zip files in the bucket")
+@click.option("--override/--no-override", type=bool, is_flag=True, default=False, help="Override remote zip files in the bucket")
+@click.option("--upload/--no-upload", type=bool, is_flag=True, default=True, help="Do upload zip files")
 @click.argument("root", type=click.Path(exists=True))
-def upload(project: str, type: str, override: bool, root: str):
+def upload(project: str, type: str, override: bool, upload: bool, root: str):
 
     dataset = ObfuDataset(root)
 
@@ -123,30 +133,32 @@ def upload(project: str, type: str, override: bool, root: str):
         if BinaryType.PLAIN in bin_types:
             # check plain
             src_dir = dataset.get_src_path(proj)
-            src_zip = src_dir.parent / "sources.zip"
+            src_zip = src_dir.parent / make_zip_name(proj, BinaryType.PLAIN)
             if not src_zip.exists():
                 print(f"Create zip: {src_zip}")
                 make_source_zip(src_zip, src_dir)
             remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{proj.value}/"
 
             # Copy only if not present
-            print(f"Remote copy: {src_zip}")
-            rclone.copy(str(src_zip.resolve()), remote_path, ignore_existing=not override)
+            if upload:
+                print(f"Remote copy: {src_zip}")
+                rclone.copy(str(src_zip.resolve()), remote_path, ignore_existing=not override)
 
         if BinaryType.OBFUSCATED in bin_types:
             # check obfuscated
             for obfu in Obfuscator:
                 for obpass in supported_passes(obfu):
                     obfu_dir = dataset.get_obfu_path(proj, obfu, obpass)
-                    obpass_zip = obfu_dir.parent / f"{obpass.value}.zip"
+                    obpass_zip = obfu_dir.parent / make_zip_name(proj, BinaryType.OBFUSCATED, obfu, obpass)
                     if not obpass_zip.exists():
                         print(f"Create zip: {obpass_zip}")
                         make_obfuscation_zip(obpass_zip, obfu_dir)
                     remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{proj.value}/obfuscated/{obfu.value}/"
 
                     # Copy only if not present
-                    print(f"Remote copy: {obpass_zip}")
-                    rclone.copy(str(obpass_zip.resolve()), remote_path, ignore_existing=not override)
+                    if upload:
+                        print(f"Remote copy: {obpass_zip}")
+                        rclone.copy(str(obpass_zip.resolve()), remote_path, ignore_existing=not override)
 
 
 if __name__ == "__main__":
