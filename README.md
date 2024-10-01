@@ -36,7 +36,6 @@ The dataset is organized as follows.
  │   │   ├── obfuscator
  │   │   │   ├── obfuscation-pass
  │   │   │   │   ├── obfuscation-level
- |   |   |   |   |
  |   ├── sources
 ```
 
@@ -99,12 +98,12 @@ These three commands are sufficient for any users that would like to use this da
 
 The ```create, compile, strip, export``` commands are available for people that would like to recreate the dataset.
 
-> Recreating the whole dataset will require a lot of time. Notice that we do not guarantee that the produced binaries will be exactly the sames as the ones provided (due to compilation specificities, see [TODO])
-
+> Recreating the whole dataset will require a lot of time. Notice that we do not guarantee that the produced binaries will be exactly the same as the ones provided (due to compilation specificities, see [TODO])
 
 ## Detailed description
 
-We consider five projects : zlib, lz4, minilua, sqlite and freetype. They were chosen because they are currently the only projects than can be found on the Internet under an amalgamate form. 
+[TODO add project links]
+We consider five projects : [zlib](https://github.com/forrestthewoods/lib_fts/tree/master/tests/amalgamate), [lz4](https://github.com/lz4/lz4), [minilua](https://github.com/edubart/minilua), [sqlite](https://www.sqlite.org/amalgamation.html) and [freetype](https://github.com/vinniefalco/FreeTypeAmalgam). They were chosen because they are currently the only projects than can be found on the Internet under an amalgamate form. 
 
 An amalgamate C file is a project in C that stands in a single and unique C file. Amalgamating C project is difficult. Such constraint can be explained by the fact Tigress obfuscation works well only on amalgamate C file.
 
@@ -118,9 +117,9 @@ We use two obfuscators : Tigress and OLLVM. Tigress is a source-to-source obfusc
 
 We study the following Tigress obfuscation passes, given their type: [TODO, give links]
 
-- Data obfuscation: encodearith and encodeliteral
-- Intra-procedural obfuscation: CFF, virtualize, opaque
-- Inter-procedural obfuscation: copy, merge, split
+- Data obfuscation: [encodearith](https://tigress.wtf/encodeArithmetic.html) and [encodeliteral](https://tigress.wtf/encodeLiterals.html)
+- Intra-procedural obfuscation: [CFF](https://tigress.wtf/flatten.html), [virtualize](https://tigress.wtf/virtualize.html), [opaque](https://tigress.wtf/addOpaque.html)
+- Inter-procedural obfuscation: [copy](https://tigress.wtf/copy.html), [merge](https://tigress.wtf/merge.html), [split](https://tigress.wtf/split.html)
 
 We use these passes using their default parameters. 
 We also created a new obfuscation classes called: mix1 and mix2. Mix1 combines CFF, encodearith and opaque whereas mix2 combines mix1 and split. These two obfuscation schemas represent a real-case scenario where a function is not obfuscated with a single pass but with multiple that are combined together.
@@ -151,7 +150,7 @@ A dataset is not an immutable amount of data. It should be enriched over time.
 
 Any help to enhance this dataset is warmely welcome. In particular, we would appeciate:
 
-- Any help related to the creation of amalgamate C files. One Tigress current constraint is to use amalgamate C files. Such file are difficult to find. If you know an amalgamate project that is not in the dataset, please let us know. 
+- Any help related to the creation of amalgamate C files. One Tigress current constraint is to use amalgamate C files. These files are difficult to find. If you know an amalgamate project that is not in the dataset, please let us know. 
 - Any help related to the obfuscator used. We currently support OLLVM (rebased on LLVM-14) and Tigress 3.1.11. If you know another (free) obfuscators, please let us know. Notice that forks of OLLVM do not represent a real added values. 
 - Any help related to the binaries compilation. Our dataset only contains x86-64 binaries, either compiled in -O0 or -O2. If you want to add other optimization levels (-O1, -O3, -Os), please feel free to do it. If you want to add other architecture, it might be possible (even thought a bit more difficult than just recompiling binaries with other optimization level). Please contact use for more info. 
 
