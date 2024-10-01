@@ -59,8 +59,8 @@ Currently, the dataset provides:
 
 This dataset is provided along with a python package that aims to ease data download in particular. It can be installed as follows (preferably inside a virtual env):
 ```
-git clone
-cd
+git clone git@github.com:quarkslab/diffing_obfuscation_dataset.git
+cd diffing_obfuscation_dataset
 pip install .
 ```
 
