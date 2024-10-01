@@ -102,20 +102,21 @@ The ```create, compile, strip, export``` commands are available for people that 
 
 ## Detailed description
 
-[TODO add project links]
 We consider five projects : [zlib](https://github.com/forrestthewoods/lib_fts/tree/master/tests/amalgamate), [lz4](https://github.com/lz4/lz4), [minilua](https://github.com/edubart/minilua), [sqlite](https://www.sqlite.org/amalgamation.html) and [freetype](https://github.com/vinniefalco/FreeTypeAmalgam). They were chosen because they are currently the only projects than can be found on the Internet under an amalgamate form. 
 
-An amalgamate C file is a project in C that stands in a single and unique C file. Amalgamating C project is difficult. Such constraint can be explained by the fact Tigress obfuscation works well only on amalgamate C file.
+An amalgamate C file is a project in C that stands in a single and unique C file. Amalgamating C project is difficult. Such constraint can be explained by the fact Tigress3 obfuscation works well only on amalgamate C file.
 
-> It might be possible to use the cilly-merge Tigress functionality that allows to merge multiple C files into one. However, we cannot make it work on realistic binaries. That explains why we directly work on amalgamate C files, which restricts the number of available projects.
+> It might be possible to use the cilly-merge Tigress 3 functionality that allows to merge multiple C files into one. However, we cannot make it work on realistic binaries. That explains why we directly work on amalgamate C files, which restricts the number of available projects.
 
-We use two obfuscators : Tigress and OLLVM. Tigress is a source-to-source obfuscator whereas OLLVM compiles a binary by integrating directly obfuscation into it. OLLVM was ported to LLVM-14.
+> Only Tigress 3 was used in this dataset
 
-> Notice that Tigress, due to internal error, may not succeed to produce an obfuscated source code or, if it does, the obfuscated .c file may not compiled, despite all our efforts. This explains why for example the sqlite project has no binaries obfuscated with the Virtualization passes.
+We use two obfuscators : [Tigress](https://tigress.wtf/index.html) and [OLLVM](https://github.com/obfuscator-llvm/obfuscator). Tigress is a source-to-source obfuscator whereas OLLVM compiles a binary by integrating directly obfuscation into it. OLLVM was ported to LLVM-14.
+
+> Notice that Tigress, due to internal error, may not succeed to produce an obfuscated source code or, if it does, the obfuscated .c file may not compiled, despite all our efforts. This explains why for example the sqlite project has no binaries obfuscated with the Virtualization pass.
 
 > The obfuscation of OLLVM remains as they are, we do not apply further change to make the passes compatible with LLVM-14. Instead, we make sure that OLLVM binaries can be compiled using LLVM-14.
 
-We study the following Tigress obfuscation passes, given their type: [TODO, give links]
+We study the following Tigress obfuscation passes, given their type:
 
 - Data obfuscation: [encodearith](https://tigress.wtf/encodeArithmetic.html) and [encodeliteral](https://tigress.wtf/encodeLiterals.html)
 - Intra-procedural obfuscation: [CFF](https://tigress.wtf/flatten.html), [virtualize](https://tigress.wtf/virtualize.html), [opaque](https://tigress.wtf/addOpaque.html)
@@ -126,17 +127,17 @@ We also created a new obfuscation classes called: mix1 and mix2. Mix1 combines C
 
 For OLLVM, we consider:[TODO add links]
 
-- Data obfuscation: encodearith ~ Data/Sub
-- Intra-procedural obfuscation: CFF and opaque ~ Controlflow/Intra/BogusControlflow
+- Data obfuscation: encodearith ~ [Data/Sub](https://github.com/obfuscator-llvm/obfuscator/wiki/Instructions-Substitution)
+- Intra-procedural obfuscation: [CFF](https://github.com/obfuscator-llvm/obfuscator/wiki/Control-Flow-Flattening) and opaque ~ [BogusControlflow](https://github.com/obfuscator-llvm/obfuscator/wiki/Bogus-Control-Flow)
 - mix1 = CFF + encodearith + opaque
 
 > The combined obfuscation schema means that each function is obfuscated with this precise schema. If a function is obfuscated, it means it was obfuscated with first a Flattening then an EncodeArithmetic then an Opaque. It means there is no function in the binary that was only obfuscated with a Flattening and a Opaque or a Flattening alone. 
 
 Our binaries are obfuscated depending on a obfuscation level. Such obfuscation level determine the percentage of functions that are obfuscated inside a binary, considering the selected obfuscation pass.
 
-Similarly, our binaries are obfuscated given a seed. It influences how the obfuscation was applied (see [TODO]).
+Similarly, our binaries are obfuscated given a seed. It influences how the obfuscation was applied (see [tigress seed](https://tigress.wtf/top-level.html)).
 
-> Example. The binary "dataset/zlib/obfuscated/tigress/CFF/50/zlib_obfuscated_tigress_controlflow_intra_flatten_50_3.c.exe" indicates that the project zlib was obfuscated using Tigress with a intra-procedural obfuscation that flattens the controlflow. 50% of the functions are obfuscated and the seed is set to 3.
+> Example. The binary "dataset/zlib/obfuscated/tigress/CFF/50/zlib_tigress_gcc_x64_CFF_50_1_O0.exe" indicates that the project zlib was obfuscated using Tigress with a intra-procedural obfuscation that flattens the controlflow. 50% of the functions are obfuscated and the seed is set to 3.
 
 > Notice that the obfuscation level indicates the percentage of functions obfuscated inside a binary. It does not indicate the obfuscation ratio applied within a function. For example, 50% indicates that 50% of the binary function were obfuscated given an obfuscation schema, but it does not mean that 50% of a function content were obfuscated.
 
