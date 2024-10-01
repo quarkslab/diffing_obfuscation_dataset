@@ -125,7 +125,7 @@ We study the following Tigress obfuscation passes, given their type:
 We use these passes using their default parameters. 
 We also created a new obfuscation classes called: mix1 and mix2. Mix1 combines CFF, encodearith and opaque whereas mix2 combines mix1 and split. These two obfuscation schemas represent a real-case scenario where a function is not obfuscated with a single pass but with multiple that are combined together.
 
-For OLLVM, we consider:[TODO add links]
+For OLLVM, we consider:
 
 - Data obfuscation: encodearith ~ [Data/Sub](https://github.com/obfuscator-llvm/obfuscator/wiki/Instructions-Substitution)
 - Intra-procedural obfuscation: [CFF](https://github.com/obfuscator-llvm/obfuscator/wiki/Control-Flow-Flattening) and opaque ~ [BogusControlflow](https://github.com/obfuscator-llvm/obfuscator/wiki/Bogus-Control-Flow)
