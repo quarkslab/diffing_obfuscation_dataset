@@ -15,6 +15,10 @@ from subprocess import PIPE
 import tempfile
 import sys
 import lief
+import json
+from joblib import delayed, Parallel
+import binexport
+import quokka
 
 # third-party libraries
 from idascript import MultiIDA, iter_binary_files, IDA
@@ -412,7 +416,6 @@ def compile(root: str, project: str, variant: str, obfuscator: str, compiler: st
         assert False
 
     for sample in samples:
-        print('sample binary:', sample.binary_file, sample.source_file)
         if (not sample.binary_file.exists()) and (sample.source_file.exists()):
             print(f"compile sample: {sample.binary_file.name}")
             if dataset.compile(sample):
@@ -421,27 +424,15 @@ def compile(root: str, project: str, variant: str, obfuscator: str, compiler: st
                 console.log(f":cross_mark: {sample.binary_file} fail to compile")
                 exit()
 
-
-#@main.command(name="extract-symbols")
-#@click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
-#@click.option('-s', "--script", type=click.Path(), required=True, help="Script to extract symbols")
-#@click.option('-ida', "--ida_path", type=click.Path(), required=True, help="IDA path")
-#def extract_symbols(root, script, ida_path):
-#     logging.info('Extracting of symbols will start')
-#     all_binaries = Path(root).glob("*")
-#     for (retcode, file) in MultiIDA.map(all_binaries, script, []):
-#         logging.info('Extraction for file:', file, 'ended with return code:', retcode)
-
-
 def extract(console, binary_file):
     binary = lief.parse(binary_file)
-    gt = {f.addr:f.name for f in binary.functions}
+    gt = {hex(f.address):f.name for f in binary.functions}
     binary_file.with_suffix('.json').write_text(json.dumps(gt))
     if gt:
-        console.log(f":white_check_mark: {file}")
+        console.log(f":white_check_mark: {binary_file.with_suffix('.json')}")
     else:
-        console.log(f":cross_mark: {file}")
-        
+        console.log(f":cross_mark: {binary_file.with_suffix('.json')}")
+
 @main.command(name="extract-symbols")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 def extract_symbols(root):
@@ -479,16 +470,42 @@ def strip(root):
     #    strip_file(console, sample.binary_file)
 
     for sample in dataset.iter_obfuscated_samples():
-        strip_file(console, sample.binary_file)
+        if sample.binary_file.exists():
+            strip_file(console, sample.binary_file)
 
 
-
+def export_binary(console: Console, file: Path, export: str) -> None:
+    if (not file.quokka_file.exists()) and export == 'Quokka':
+        binary = quokka.Program.from_binary(str(file.binary_file), timeout=500000)  #Add a very large timeout for large binaries
+        if isinstance(binary, quokka.program.Program):
+            console.log(f":white_check_mark: {file.binary_file}")
+            file.binary_file.with_suffix(file.binary_file.suffix + '.Quokka').rename(file.binary_file.with_suffix('.Quokka'))
+            if file.binary_file.with_suffix(file.binary_file.suffix + '.i64').exists():
+                file.binary_file.with_suffix(file.binary_file.suffix + '.i64').unlink()
+        else:
+            console.log(f":cross_mark: {file.binary_file}")
+            
+    if (not file.binexport_file.exists()) and export == 'BinExport':
+        binary = binexport.ProgramBinExport.from_binary_file(file.binary_file, open_export=False)
+        if binary:
+            console.log(f":white_check_mark: {file.binary_file}")
+        else:
+            console.log(f":cross_mark: {file.binary_file}")
+    
 @main.command(name="export")
-def export():
-    # TODO: Export both with Quokka & Binexport
-    pass
+@click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
+@click.option("-e", "--export", type=click.Choice(['BinExport', 'Quokka']), required=False, default=None, help='Export to execute')
+@click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
+def export(root, export, threads):
+  
+    export = [export] if export else ['BinExport', 'Quokka']
 
+    console = Console()
 
+    dataset = ObfuDataset(root)
+    for e in export:
+        Parallel(n_jobs=threads, backend='threading')(delayed(export_binary)(console, sample, e) for sample in dataset.iter_obfuscated_samples() if sample.symbols_file.exists())
+    
 
 if __name__ == "__main__":
     main()

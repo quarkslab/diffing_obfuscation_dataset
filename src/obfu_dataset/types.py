@@ -164,7 +164,7 @@ class Sample:
     @property
     def basename_src(self) -> str:
         """
-        Return the name a source file (without extension)
+        Return the name of a source file (without extension)
 
         Name mangling for src
             Plain : [project].c
@@ -209,7 +209,14 @@ class Sample:
     @property
     def symbols_file(self) -> Path:
         return self.base_dir / (self.basename_bin + ".json")
-
+    
+    @property
+    def h_file(self) -> Path:
+        if self.project.value == 'minilua':
+            return self.base_dir / self.basename_bin.with_suffix(".h")
+        else:
+            return self.base_dir / (self.project.value + ".h") 
+        
     def get_symbols(self) -> dict[int, str]:
         return json.loads(self.symbols_file.read_text())
 

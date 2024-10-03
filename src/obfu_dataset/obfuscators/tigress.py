@@ -67,7 +67,6 @@ def run_tigress(infile: Path,
     ]
     while '' in cmd:
         cmd.remove('')
-    print('cmd:', cmd)
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, err = p.communicate()
     return p.returncode == 0

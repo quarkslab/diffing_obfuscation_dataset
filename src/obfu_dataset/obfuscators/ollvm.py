@@ -4,7 +4,7 @@ import re
 from operator import attrgetter
 from random import Random
 import subprocess
-
+import shutil
 from obfu_dataset import ObPass, Sample
 from pathlib import Path
 import clang.cindex
@@ -38,8 +38,9 @@ def _obpass_to_annotation(obpass):
             items = ["fla", "sub", "bcf"]
         case _:
             assert False
-    s = ",".join(f"annotate({x})" for x in items)
-    return f"__attribute__(({s}))\n"
+    s = ",".join('annotate("'+x+'")' for x in items)
+    print('output:', s)
+    return '__attribute__(('+s+'))\n'
 
 
 def compute_symbols_stats(bin_symbols, funcs):
@@ -128,7 +129,9 @@ def compile_ollvm(sample: Sample) -> bool:
     ollvm_args = os.environ.get("OLLVM_ARGS")
     if ollvm_path.name != "clang":
         ollvm_path = ollvm_path / "clang"
-
+    if not sample.h_file.exists():
+        src_h_file = sample.root_path / sample.project.value / "sources" / (sample.project.value + ".h")
+        shutil.copy(src_h_file, sample.h_file)
     args = [str(ollvm_path),
             f"-{sample.optimization.value}",
             "-lm",
@@ -141,7 +144,6 @@ def compile_ollvm(sample: Sample) -> bool:
             f"{sample.source_file}"
     ] + ollvm_args.split(" ")
     
-    print('compile:', args)
     p = subprocess.Popen(args, stdin=None, stdout=None, stderr=None)
     output, err = p.communicate()
     return p.returncode == 0
