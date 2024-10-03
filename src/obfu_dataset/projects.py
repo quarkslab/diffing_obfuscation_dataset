@@ -32,7 +32,7 @@ FUN_BLACKLIST = [
 
 error_functions_zlib = {'___errno_location', 'vsnprintf', 'printf', 'sub_401020', 'strerror', '__libc_start_main',
                         '_putchar', '_puts', 'malloc', '_close', '_lseek', 'puts', 'lseek', 'close', 'snprintf',
-                        'write', 'putchar', 'strlen', 'open', 'read', 'memcpy', 'memset', 'free', 'memchr'}
+                        'write', 'putchar', 'strlen', 'open', 'read', 'memcpy', 'memset', 'free', 'memchr', 'get_crc5_table', 'sub_1020'}
 
 error_functions_lz4 = {'deregister_tm_clones', 'register_tm_clones', '__do_global_dtors_aux', 'frame_dummy',
                        '_start', '_init', '_fini', 'zcalloc', 'zcfree', 'main', 'gzprintf'}

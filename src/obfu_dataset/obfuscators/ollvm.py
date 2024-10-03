@@ -9,7 +9,8 @@ from obfu_dataset import ObPass, Sample
 from pathlib import Path
 import clang.cindex
 import logging
-
+import clang
+import pkg_resources
 
 OLLVM_PASS = [
     ObPass.CFF,
@@ -38,7 +39,7 @@ def _obpass_to_annotation(obpass):
         case _:
             assert False
     s = ",".join(f"annotate({x})" for x in items)
-    return f"__attribute__(({s}))"
+    return f"__attribute__(({s}))\n"
 
 
 def compute_symbols_stats(bin_symbols, funcs):
@@ -75,9 +76,14 @@ def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, o
 
     # Initialize the Clang index
     libclang = find_libclang()
+    if pkg_resources.get_distribution('clang').version != str(libclang).split('.so.')[-1]:
+        logging.warning("Your clang python package does not match your system file. Please install clang"+libclang.split('.so.')[-1])
+        sys.exit(1)
     if not libclang:
         logging.error("can't find libclang.so")
         return False
+
+    clang.cindex.Config.loaded = False #For an unknown reason, gen_ollvm_annotated_source works the first time it is called, but raises an error at the second time. Need to set it to avoid error (something related to the fact the lib is already loaded).
     clang.cindex.Config.set_library_file(libclang)
     index = clang.cindex.Index.create()
 
@@ -102,11 +108,13 @@ def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, o
     candidate_functions = function_list[:int(obf_level / 100 * len(function_list))]
 
     # Insert annotation in the source file and write it back
-    # Iterate function from the end of the file to the begining so that line numbers wont be shifted by insertion
+    # Iterate function from the end of the file to the beginning so that line numbers wont be shifted by insertion
     annotation_line = _obpass_to_annotation(obpass)
+    
     lines = files[cname]
+
     for fun in sorted(candidate_functions, key=lambda x: x.location.line, reverse=True):
-        lines[fun.location.line - 1].insert(annotation_line)
+        lines.insert(fun.location.line - 1, annotation_line)
 
     # Finally write back file
     with open(dst_file, "w") as out:
@@ -122,18 +130,18 @@ def compile_ollvm(sample: Sample) -> bool:
         ollvm_path = ollvm_path / "clang"
 
     args = [str(ollvm_path),
-            f"{sample.optimization.value}",
+            f"-{sample.optimization.value}",
             "-lm",
             "-D", '__DATE__="1970-01-01"',
             '-D', '__TIME__="00:00:00"',
             '-D', '__TIMESTAMP__="1970-01-01 00:00:00"',
             "-frandom-seed=123",
-            "-fno-guess-branch-probability",
             "-lm",
             "-o", f"{sample.binary_file}",
             f"{sample.source_file}"
     ] + ollvm_args.split(" ")
-
+    
+    print('compile:', args)
     p = subprocess.Popen(args, stdin=None, stdout=None, stderr=None)
     output, err = p.communicate()
     return p.returncode == 0

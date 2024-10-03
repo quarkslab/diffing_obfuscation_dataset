@@ -14,7 +14,7 @@ class Obfuscator(Enum):
     OLLVM = "ollvm"
 
 class Compiler(Enum):
-    CLANG = "clang"
+    CLANG = "clang14"
     GCC = "gcc"
     
 class ObPass(Enum):
@@ -37,7 +37,7 @@ class Project(Enum):
     FREETYPE = "freetype"
 
 class Architecture(Enum):
-    X86_64 = "X86_64"
+    X86_64 = "x64"
     # ARM = "ARM"
     # AARCH64 = "Aarch64"
 
@@ -159,8 +159,7 @@ class Sample:
                         f"{self.architecture.value}_{self.optimization.value}")
             case BinaryType.OBFUSCATED:
                 return (f"{self.project.value}_{self.obfuscator.value}_{self.compiler.value}_"
-                        f"{self.architecture.value}_{self.obfpass.value}_{self.level}_{self.optimization.value}")
-                        # FIXME(Roxane): Pourquoi on a pas la seed dans le nom du binaire ?
+                        f"{self.architecture.value}_{self.obfpass.value}_{self.level}_{self.seed}_{self.optimization.value}")
 
     @property
     def basename_src(self) -> str:
