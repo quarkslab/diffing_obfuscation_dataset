@@ -66,21 +66,21 @@ pip install .
 Once the package is installed, the following commands are available : 
 
 ```
-obfu-dataset-cli --help
 Usage: obfu-dataset-cli [OPTIONS] COMMAND [ARGS]...
 
 Options:
   -h, --help  Show this message and exit.
 
 Commands:
-  compile              
-  create
-  download-all
-  download-obfuscated
-  download-plain
-  export
-  ls
-  strip
+  compile              Once the obfuscated sources are created, compile...
+  create               Recreate the source files for the dataset :param...
+  download-all         Download all the dataset :param root: Dataset root...
+  download-obfuscated  Download only obfuscated zip files :param root:...
+  download-plain       Download only plain (unobfuscated) zip files...
+  export               Once the binaries are stripped, export them.
+  extract-symbols      Once the obfuscated binaries are compiled, extract...
+  ls                   Plot the current state of the dataset.
+  strip                Once the obfuscated symbols are extracted, strip...
 ```
 ### Use the dataset
 
@@ -88,17 +88,45 @@ The ```download-all``` command downloads the plain (sources) folders and the obf
 
 > This step requires to download approximately 92GB of data (be patient)
 
-The ```downdload-obfuscated``` and ```download-plain``` commands respectively download obfuscated and plain (sources) folders. [TODO examples]
+The ```download-obfuscated``` and ```download-plain``` commands respectively download obfuscated and plain (sources) folders.
+```
+obfu-dataset-cli download-plain -r dataset/ -t 5
+✅ ZLIB downloaded in temporary dir: /tmp/zlib-sources.zip                                                                                                   
+✅ zlib-sources.zip extracted in: dataset/zlib
+```
+                                                                                                           
+The ```ls``` command helps the user to manually check what has been downloaded.
 
-The ```ls``` command helps the user to manually check what has been downloaded. [TODO example]
+```
+obfu-dataset-cli ls dataset/
+┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━┳━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┓
+┃ Sample                ┃ zlib ┃ lz4 ┃ minilua ┃ sqlite ┃ freetype ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━╇━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━┩
+│ sources               │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|copy          │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|merge         │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|split         │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|CFF           │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|opaque        │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|virtualize    │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|encodearith   │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|encodeliteral │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|mix1          │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ tigress|mix2          │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
+│ ollvm  |CFF           │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
+│ ollvm  |opaque        │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
+│ ollvm  |encodearith   │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
+│ ollvm  |mix1          │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
+└───────────────────────┴──────┴─────┴─────────┴────────┴──────────┘
+```
 
 These three commands are sufficient for any users that would like to use this dataset. 
 
 ### Recreate the dataset
 
-The ```create, compile, strip, export``` commands are available for people that would like to recreate the dataset.
+The ```create, compile, extract-symbols, strip, export``` commands are available for people that would like to recreate the dataset. They should be executed in this order. 
 
-> Recreating the whole dataset will require a lot of time. Notice that we do not guarantee that the produced binaries will be exactly the same as the ones provided (due to compilation specificities, see [TODO])
+> Recreating the whole dataset will require a lot of time. Notice that we do not guarantee that the produced binaries will be exactly the same as the ones provided (due to compilation specificities)
 
 ## Detailed description
 
