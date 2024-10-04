@@ -100,6 +100,13 @@ def main():
 @main.command(name="ls")
 @click.argument("root", type=click.Path(exists=True))
 def ls(root: str):
+    """
+    Plot the current state of the dataset.
+    
+    :param root: Dataset root
+    :return:
+    """
+    
     console = Console()
     dataset = ObfuDataset(root)
 
@@ -268,7 +275,14 @@ def download_packages(root: str,
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
 @click.argument("project", required=False, type=click.Choice(PROJ_OPT), nargs=-1)
 def download_plain(root: str, threads: int, project: tuple[str]):
-
+    """
+    Download only plain (unobfuscated) zip files
+    
+    :param root: Dataset root
+    :param threads: Number of threads to use
+    :param project: Optional project to specify
+    :return:
+    """
     if project:
         projects = [Project(x) for x in project]
     else:  # Take all projects
@@ -284,6 +298,16 @@ def download_plain(root: str, threads: int, project: tuple[str]):
 @click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
 @click.option("-op", "--obf-pass", type=click.Choice(PASS_OPT), default=None, required=False, help="Obfuscation pass to download (all if none)")
 def download_obfuscated(root: str, threads: int, project: str, obfuscator: str | None, obf_pass: str | None):
+    """
+    Download only obfuscated zip files
+    
+    :param root: Dataset root
+    :param threads: Number of threads to use
+    :param project: Optional project to specify
+    :param obfuscator: Optional obfuscator to specify
+    :param obf_pass: Optional obfuscation pass to specify
+    :return:
+    """
 
     project = [Project(project)]
     obfuscator = [Obfuscator(obfuscator)] if obfuscator else list(Obfuscator)
@@ -296,6 +320,13 @@ def download_obfuscated(root: str, threads: int, project: str, obfuscator: str |
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
 def download_all(root: str, threads: int):
+    """
+    Download all the dataset
+    
+    :param root: Dataset root
+    :param threads: Number of threads to use
+    :return:
+    """
     download_packages(root, threads, BinaryType.PLAIN, [], [], [])
     download_packages(root, threads, BinaryType.OBFUSCATED, [], [], [])
 
@@ -349,6 +380,16 @@ def create_binary(dataset, console, proj, obfuscator, obf, level, seed):
 @click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
 def create(root: str, project:str, obfuscator:str, threads:int):
+    """
+    Recreate the source files for the dataset
+    
+    :param root: Dataset root
+    :param project: Optional project to specify
+    :param obfuscator: Optional obfuscator to specify
+    :param threads: Number of threads to use
+    :return:
+    """
+    
     console = Console()
 
     if not check_tigress_environ():
@@ -437,13 +478,18 @@ def compile_binary(console, sample):
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
 def compile(root: str, project: str, variant: str, obfuscator: str, compiler: str, optim: str, threads: int):
     """
-    Compile both plain and obfuscated binaries. OLLVM path and additional parameters should be given
+    Once the obfuscated sources are created, compile both plain and obfuscated binaries. OLLVM path and additional parameters should be given
     through environment variables:
     * OLLVM_PATH=/home/foo/_build/bin/
     * OLLVM_ARGS="-fpass-plugin=/home/foo/_build/lib/Ollvm.so -Xclang -load -Xclang /home/foo/_build/lib/Ollvm.so"
 
     :param root: Dataset root
-    :param ollvm_dir: directory where OLLVM is located
+    :param project: Optional project to specify
+    :param variant: Optional mode for compiler, either plain or obfuscated binaries
+    :param obfuscator: Optional obfuscator to specify
+    :param compiler: Optional compiler to specify
+    :param optim: Optional optimization level to specify
+    :param threads: Number of threads to use
     :return:
     """
     console = Console()
@@ -483,6 +529,12 @@ def extract(console, binary_file):
 @main.command(name="extract-symbols")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 def extract_symbols(root):
+    """
+    Once the obfuscated binaries are compiled, extract their symbols as a dictionnary {fun_addr:fun_name}
+    
+    :param root: Dataset root
+    :return:
+    """
     console = Console()
 
     dataset = ObfuDataset(root)
@@ -508,6 +560,13 @@ def strip_file(console: Console, file: Path) -> None:
 @main.command(name="strip")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 def strip(root):
+    """
+    Once the obfuscated symbols are extracted, strip the binaries
+    
+    :param root: Dataset root
+    :return:
+    """
+    
     console = Console()
 
     dataset = ObfuDataset(root)
@@ -544,7 +603,15 @@ def export_binary(console: Console, file: Path, export: str) -> None:
 @click.option("-e", "--export", type=click.Choice(['BinExport', 'Quokka']), required=False, default=None, help='Export to execute')
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
 def export(root, export, threads):
-  
+    """
+    Once the binaries are stripped, export them.
+    
+    :param root: Dataset root
+    :param export: Optional export type to specify
+    :param threads: Number of threads to use
+    :return:
+    """
+    
     export = [export] if export else ['BinExport', 'Quokka']
 
     console = Console()
