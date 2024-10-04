@@ -39,7 +39,6 @@ def _obpass_to_annotation(obpass):
         case _:
             assert False
     s = ",".join('annotate("'+x+'")' for x in items)
-    print('output:', s)
     return '__attribute__(('+s+'))\n'
 
 
