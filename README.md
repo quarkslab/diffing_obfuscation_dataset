@@ -167,11 +167,10 @@ Similarly, our binaries are obfuscated given a seed. It influences how the obfus
 
 > Example. The binary "dataset/zlib/obfuscated/tigress/CFF/50/zlib_tigress_gcc_x64_CFF_50_1_O0.exe" indicates that the project zlib was obfuscated using Tigress with a intra-procedural obfuscation that flattens the controlflow. 50% of the functions are obfuscated and the seed is set to 3.
 
-> Notice that the obfuscation level indicates the percentage of functions obfuscated inside a binary. It does not indicate the obfuscation ratio applied within a function. For example, 50% indicates that 50% of the binary function were obfuscated given an obfuscation schema, but it does not mean that 50% of a function content were obfuscated.
+> Notice that the obfuscation level indicates the percentage of functions obfuscated inside a binary. It does not indicate the obfuscation ratio applied within a function. For example, 50% indicates that 50% of the binary function were obfuscated given an obfuscation schema, but it does not mean that 50% of a function content were obfuscated.A sum-up of the dataset is available in the Table below: [TODO].
 
-A sum-up of the dataset is available in the Table below: [TODO].
-
-
+A sum-up of the dataset is available in the Table below:
+![dataset_view](./figs/dataset_view.png)
 
 # How to contribute
 
