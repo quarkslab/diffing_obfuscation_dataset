@@ -1,15 +1,12 @@
 import os
-import random
 import re
-from operator import attrgetter
 from random import Random
 import subprocess
-
+import shutil
 from obfu_dataset import ObPass, Sample
 from pathlib import Path
 import clang.cindex
 import logging
-
 
 OLLVM_PASS = [
     ObPass.CFF,
@@ -37,8 +34,8 @@ def _obpass_to_annotation(obpass):
             items = ["fla", "sub", "bcf"]
         case _:
             assert False
-    s = ",".join(f"annotate({x})" for x in items)
-    return f"__attribute__(({s}))"
+    s = ",".join('annotate("'+x+'")' for x in items)
+    return '__attribute__(('+s+'))\n'
 
 
 def compute_symbols_stats(bin_symbols, funcs):
@@ -78,15 +75,22 @@ def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, o
     if not libclang:
         logging.error("can't find libclang.so")
         return False
-    clang.cindex.Config.set_library_file(libclang)
-    index = clang.cindex.Index.create()
+
+    try:
+        clang.cindex.Config.loaded = False #For an unknown reason, gen_ollvm_annotated_source works the first time it is called, but raises an error at the second time. Need to set it to avoid error (something related to the fact the lib is already loaded).
+        clang.cindex.Config.set_library_file(libclang)
+        index = clang.cindex.Index.create()
+    except Exception:
+        logging.warning("Your clang python bindings does not match your system file."
+                        "Please install: pip install clang==XX")
+        return False
 
     # Read both files
     cname = sample.source_file.name
-    hfile = sample.source_file.with_suffix(".h")
+    hname = sample.header_file.name
     files = {
         cname: open(sample.source_file, 'r').readlines(),
-        hfile.name: open(hfile, "r").readlines()
+        hname: open(sample.header_file, "r").readlines()
     }
 
     # Parse the file with Clang
@@ -102,11 +106,13 @@ def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, o
     candidate_functions = function_list[:int(obf_level / 100 * len(function_list))]
 
     # Insert annotation in the source file and write it back
-    # Iterate function from the end of the file to the begining so that line numbers wont be shifted by insertion
+    # Iterate function from the end of the file to the beginning so that line numbers wont be shifted by insertion
     annotation_line = _obpass_to_annotation(obpass)
+    
     lines = files[cname]
+
     for fun in sorted(candidate_functions, key=lambda x: x.location.line, reverse=True):
-        lines[fun.location.line - 1].insert(annotation_line)
+        lines.insert(fun.location.line - 1, annotation_line)
 
     # Finally write back file
     with open(dst_file, "w") as out:
@@ -122,18 +128,17 @@ def compile_ollvm(sample: Sample) -> bool:
         ollvm_path = ollvm_path / "clang"
 
     args = [str(ollvm_path),
-            f"{sample.optimization.value}",
+            f"-{sample.optimization.value}",
             "-lm",
             "-D", '__DATE__="1970-01-01"',
             '-D', '__TIME__="00:00:00"',
             '-D', '__TIMESTAMP__="1970-01-01 00:00:00"',
             "-frandom-seed=123",
-            "-fno-guess-branch-probability",
             "-lm",
             "-o", f"{sample.binary_file}",
             f"{sample.source_file}"
     ] + ollvm_args.split(" ")
-
+    
     p = subprocess.Popen(args, stdin=None, stdout=None, stderr=None)
     output, err = p.communicate()
     return p.returncode == 0

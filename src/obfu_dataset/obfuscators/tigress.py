@@ -7,7 +7,8 @@ import re
 from random import Random
 
 from obfu_dataset import ObPass, Sample, Project
-from obfu_dataset.projects import *
+from obfu_dataset.projects import error_functions_zlib, error_functions_lz4, error_functions_minilua, error_functions_sqlite, FUN_BLACKLIST
+
 
 TIGRESS_PASS = [
     ObPass.COPY,
@@ -46,6 +47,8 @@ def run_tigress(infile: Path,
                 params: list[str],
                 fun_perc: int,
                 split_count: int = -1) -> bool:
+    opaque_passes = [ObPass.OPAQUE, ObPass.CFF_ENCODEARITH_OPAQUE, ObPass.CFF_ENCODEARITH_OPAQUE_SPLIT]
+    split_passes = [ObPass.SPLIT, ObPass.CFF_ENCODEARITH_OPAQUE_SPLIT]
     cmd = [
         "tigress",
         "-D", "_Float64=double",
@@ -54,22 +57,21 @@ def run_tigress(infile: Path,
         "-D", "_Float64x=double",
         "--Environment=x86_64:Linux:Gcc:4.6",
         f"--Seed={seed}",
-        f"--Transform=InitOpaque" if ObPass.OPAQUE else ""
-        f"--Functions=main" if ObPass.OPAQUE else ""
+        f"--Transform=InitOpaque" if obfu in opaque_passes else ""
+        f"--Functions=main" if obfu in opaque_passes else ""
         f"--Transform={PASS_CMDLINE[obfu]}" if not params else ""] + \
         params + \
-        [f"--SplitKinds=deep,block,top" if ObPass.SPLIT else "",
-        f"--SplitCount={split_count}" if ObPass.SPLIT else "",
-        f"--Functions=%{fun_perc}",
+        [f"--SplitKinds=deep,block,top" if obfu in split_passes else "",
+        f"--SplitCount={split_count}" if obfu in split_passes else "",
+        f"--Functions=%{fun_perc}" if not params else "",
         "--out=" + str(outfile),
         str(infile)
     ]
-
+    while '' in cmd:
+        cmd.remove('')
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, err = p.communicate()
     return p.returncode == 0
-
-
 
 
 def _fix_source_zlib(lines: list[str]) -> None:
@@ -82,6 +84,7 @@ def _fix_source_zlib(lines: list[str]) -> None:
         #zlib copy
         if 'extern FILE *tmpfile(void)  __attribute__((__malloc__(fclose,1), __malloc__)) ;\n' in line:
             lines.pop(i)
+        i=i+1
 
 def _fix_source_lz4(lines: list[str]) -> None:
     i = 0
@@ -90,7 +93,7 @@ def _fix_source_lz4(lines: list[str]) -> None:
         #lz4 merge
         if 'void __attribute__((__visibility__("default")))  merge_dummy_return' in line:
             lines[i] = line.replace('void ', '')
-
+        i+=1
 
 def _fix_source_sqlite(lines: list[str]) -> None:
     i = 0
@@ -142,7 +145,8 @@ def _fix_source_sqlite(lines: list[str]) -> None:
                 and ('char const   *__modes )  __attribute__((__malloc__(fclose,1),\n' in lines[i+2]) \
                 and ('__malloc__)) ;\n' in lines[i+3]):
             del lines[i:i+3]
-
+        i+=1
+        
 def _fix_source_minilua(lines: list[str]) -> None:
     i = 0
     while i < len(lines):
@@ -165,7 +169,7 @@ def _fix_source_minilua(lines: list[str]) -> None:
 
         if 'void __attribute__((__visibility__("internal")))  merge_dummy_return' in lines[i+1]:
             del lines[i:i+1]
-
+        i+=1
 
 def _fix_source_freetype(lines: list[str]) -> None:
     i = 0
@@ -195,12 +199,11 @@ def _fix_source_freetype(lines: list[str]) -> None:
         if ('extern FILE *fopen(char const   * __restrict  __filename , char const   * __restrict  __modes )  '
             '__attribute__((__malloc__(fclose,1),\n' in lines[i+1]) and ('__malloc__)) ;\n' in lines[i+2]):
             del lines[i:i+2]
-
+        i+=1
 
 def tigress_fixup(project: Project, file: Path) -> bool:
     # Read lines
     lines = open(file, "r").readlines()
-
     # Apply the right fixups depending on the project
     match project:
         case Project.ZLIB:
@@ -213,7 +216,6 @@ def tigress_fixup(project: Project, file: Path) -> bool:
             _fix_source_sqlite(lines)
         case Project.MINILUA:
             _fix_source_minilua(lines)
-
     # Write-back the file
     open(file, "w").writelines(lines)
     return True
@@ -229,7 +231,13 @@ def _get_funs_to_obfuscate(sample: Sample, obf_level, seed: int) -> list[str]:
 
 
 def get_mix1_parameters(sample: Sample, obf_level, seed: int) -> list[str]:
-    candidate_functions = _get_funs_to_obfuscate(sample, obf_level, seed)
+    
+    error_functions = error_functions_zlib | error_functions_lz4 | error_functions_minilua | error_functions_sqlite
+
+    candidate_functions = set(_get_funs_to_obfuscate(sample, obf_level, seed))
+    candidate_functions -= error_functions
+    candidate_functions = list(candidate_functions)
+    
     return ["--Transform=Flatten", f"--Functions={','.join(candidate_functions)}",
             "--Transform=EncodeArithmetic", f"--Functions={','.join(candidate_functions)}",
             "--Transform=InitOpaque", "--Functions=main",
@@ -238,19 +246,20 @@ def get_mix1_parameters(sample: Sample, obf_level, seed: int) -> list[str]:
 
 def get_mix2_parameters(sample: Sample, obf_level, seed: int, split_count: int) -> list[str]:
     params = get_mix1_parameters(sample, obf_level, seed)
+    
     return params+[
         "--Transform=Split",
-        f"--SplitCount={split_count}", f"--Functions={params[-1]}"
+        f"--SplitCount={split_count}", f"--Functions={params[-1].replace('--Functions=', '')}"
     ]
 
 
 def get_merge_parameters(sample: Sample, obf_level: int):
-    # In order to have the complete list of functions that are available for obfuscation, need to rely on -O0 binary
-
+    
+    # In order to have the complete list of functions that are available for obfuscation, need to rely on -O0 binary    
     # Retrieve symbols of the -O0 binary and filter out all unwanted functions
     symbols = json.loads(sample.symbols_file.read_text())
     functions_list = [v for v in symbols.values() if v != '']
-
+    
     error_functions = error_functions_zlib | error_functions_lz4 | error_functions_minilua | error_functions_sqlite
 
     candidates_to_merge = {f for f in functions_list if 'i$nit' not in f and not f.startswith('_')}

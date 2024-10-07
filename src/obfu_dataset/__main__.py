@@ -14,6 +14,11 @@ import hashlib
 from subprocess import PIPE
 import tempfile
 import sys
+import lief
+import json
+from joblib import delayed, Parallel
+import binexport
+import quokka
 
 # third-party libraries
 from idascript import MultiIDA, iter_binary_files, IDA
@@ -33,7 +38,7 @@ from rich.progress import (
 
 from obfu_dataset.types import BinaryType
 # local imports
-from obfu_dataset import get_download_link, DownloadLink
+from obfu_dataset import get_download_link, DownloadLink, Sample
 from obfu_dataset.types import Project, Obfuscator, ObPass, OptimLevel, Architecture, Compiler
 from obfu_dataset.dataset import ObfuDataset
 from obfu_dataset.obfuscators.ollvm import OLLVM_PASS, gen_ollvm_annotated_source
@@ -95,6 +100,13 @@ def main():
 @main.command(name="ls")
 @click.argument("root", type=click.Path(exists=True))
 def ls(root: str):
+    """
+    Plot the current state of the dataset.
+    
+    :param root: Dataset root
+    :return:
+    """
+    
     console = Console()
     dataset = ObfuDataset(root)
 
@@ -263,7 +275,14 @@ def download_packages(root: str,
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
 @click.argument("project", required=False, type=click.Choice(PROJ_OPT), nargs=-1)
 def download_plain(root: str, threads: int, project: tuple[str]):
-
+    """
+    Download only plain (unobfuscated) zip files
+    
+    :param root: Dataset root
+    :param threads: Number of threads to use
+    :param project: Optional project to specify
+    :return:
+    """
     if project:
         projects = [Project(x) for x in project]
     else:  # Take all projects
@@ -279,6 +298,16 @@ def download_plain(root: str, threads: int, project: tuple[str]):
 @click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
 @click.option("-op", "--obf-pass", type=click.Choice(PASS_OPT), default=None, required=False, help="Obfuscation pass to download (all if none)")
 def download_obfuscated(root: str, threads: int, project: str, obfuscator: str | None, obf_pass: str | None):
+    """
+    Download only obfuscated zip files
+    
+    :param root: Dataset root
+    :param threads: Number of threads to use
+    :param project: Optional project to specify
+    :param obfuscator: Optional obfuscator to specify
+    :param obf_pass: Optional obfuscation pass to specify
+    :return:
+    """
 
     project = [Project(project)]
     obfuscator = [Obfuscator(obfuscator)] if obfuscator else list(Obfuscator)
@@ -291,13 +320,79 @@ def download_obfuscated(root: str, threads: int, project: str, obfuscator: str |
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
 def download_all(root: str, threads: int):
+    """
+    Download all the dataset
+    
+    :param root: Dataset root
+    :param threads: Number of threads to use
+    :return:
+    """
     download_packages(root, threads, BinaryType.PLAIN, [], [], [])
     download_packages(root, threads, BinaryType.OBFUSCATED, [], [], [])
 
 
+def create_one_obfuscated(dataset: ObfuDataset, console: Console, obfu_sample: Sample) -> bool:
+    sample = dataset.get_plain_sample(obfu_sample.project)
+
+    if not sample.source_file.exists():
+        console.print(sample.project.value + " sources have to be downloaded first")
+        return False
+
+    obfu_sample.base_dir.mkdir(parents=True, exist_ok=True)
+    res = True
+    out_path = obfu_sample.source_file
+
+    if out_path.exists():
+        console.print(f"{out_path} already exists")
+        return True
+
+    match obfu_sample.obfuscator:
+        case Obfuscator.TIGRESS:
+            match obfu_sample.obfpass:
+                case ObPass.MERGE:
+                    params = get_merge_parameters(sample, obfu_sample.level)
+                case ObPass.CFF_ENCODEARITH_OPAQUE:
+                    params = get_mix1_parameters(sample, obfu_sample.level, obfu_sample.seed)
+                case ObPass.CFF_ENCODEARITH_OPAQUE_SPLIT:
+                    params = get_mix2_parameters(sample, obfu_sample.level, obfu_sample.seed, SPLIT_COUNT)
+                case _:
+                    params = []
+
+            res = run_tigress(sample.source_file, out_path, obfu_sample.seed, obfu_sample.obfpass, params, obfu_sample.level, split_count=SPLIT_COUNT)
+            if res:
+                console.print(f"Tigress file generated: {out_path}")
+                if res := tigress_fixup(obfu_sample.project, out_path):
+                    console.print(f"Tigress fixup: {out_path} [OK]")
+                else:
+                    console.print(f"Tigress fixup: {out_path} [KO]")
+            else:
+                console.print(f"Tigress execution failed for {out_path}")
+                    
+        case Obfuscator.OLLVM:
+            if res := gen_ollvm_annotated_source(out_path, sample, obfu_sample.obfpass, obfu_sample.level, obfu_sample.seed):
+                logging.info(f"OLLVM file was generated at location:{out_path}")
+            else:
+                logging.warning(f"OLLVM fail to generate: {out_path}")
+
+    return res
+
+
 @main.command(name="create")
 @click.option('-r', "--root", type=click.Path(), required=True, help='Dataset root directory')
-def create(root):
+@click.option("-p", "--project", type=click.Choice(PROJ_OPT), required=False, default=None, help="Project to download")
+@click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
+@click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
+def create(root: str, project:str, obfuscator:str, threads:int):
+    """
+    Recreate the source files for the dataset
+    
+    :param root: Dataset root
+    :param project: Optional project to specify
+    :param obfuscator: Optional obfuscator to specify
+    :param threads: Number of threads to use
+    :return:
+    """
+    
     console = Console()
 
     if not check_tigress_environ():
@@ -307,87 +402,55 @@ def create(root):
 
     dataset = ObfuDataset(root)
     
-    #Tigress source generation
-    for proj in Project:
-        sample = dataset.get_plain_sample(proj)
-        src_file = dataset.get_src_path(proj) / proj.value+".c"
-        if not src_file.exists():
-            console.print("projects sources have to be downloaded first")
-            sys.exit(1)
+    projects = [Project(project)] if project else list(Project)
+    obfuscators = [Obfuscator(obfuscator)] if obfuscator else list(Obfuscator)
 
-        for obf in TIGRESS_PASS:
-            obf_path = dataset.get_obfu_path(proj, Obfuscator.TIGRESS, obf)
+    # Create all configurations to generate
+    configs = list(dataset.iter_obfuscated_samples(projects=projects, obfuscators=obfuscators))
 
-            for obf_level in range(10, 101, 10):
-                level_path = obf_path / str(obf_level)
-                level_path.mkdir(parents=True, exist_ok=True)
-                for seed in range(1, SEED_NUMBER+1):
+    Parallel(n_jobs=threads, backend='threading')(delayed(create_one_obfuscated)(dataset, console, sample) for sample in configs)
 
-                    output_path = level_path / f"{proj.value}_{Obfuscator.TIGRESS.value}_gcc_x64_{obf.value}_{obf_level}_{str(seed)}.c"
-                    print('output path:', output_path)
 
-                    match obf:
-                        case ObPass.MERGE:
-                            params = get_merge_parameters(sample, obf_level)
-                        case ObPass.CFF_ENCODEARITH_OPAQUE:
-                            params = get_mix1_parameters(sample, obf_level, seed)
-                        case ObPass.CFF_ENCODEARITH_OPAQUE_SPLIT:
-                            params = get_mix2_parameters(sample, obf_level, seed, SPLIT_COUNT)
-                        case _:
-                            params = []
-                    res = run_tigress(src_file, output_path, seed, obf, params, obf_level, split_count=SPLIT_COUNT)
-
-                    if res:
-                        console.print(f"Tigress file generated: {output_path}")
-                    else:
-                        console.print(f"tigress execution failed for {output_path}")
-
-                    if tigress_fixup(proj, output_path):
-                        console.print(f"Tigress fixup: {output_path} [OK]")
-                    else:
-                        console.print(f"Tigress fixup: {output_path} [KO]")
-
-                            
-    #OLLVM source generation
-    for proj in Project:
-        sample = dataset.get_plain_sample(proj)
-
-        for obf in OLLVM_PASS:
-            obf_path = dataset.get_obfu_path(proj, Obfuscator.OLLVM, obf)
-            for obf_level in range(10, 101, 10):
-                level_path = obf_path / str(obf_level)
-                level_path.mkdir(parent=True, exist_ok=True)
-                for seed in range(1, SEED_NUMBER+1):
-                    output_file = level_path / f"{proj.value}_{Obfuscator.OLLVM.value}_gcc_x64_{obf.value}_{obf_level}_{str(seed)}.c"
-                    if gen_ollvm_annotated_source(output_file, sample, obf, obf_level, seed):
-                        logging.info(f"OLLVM file was generated at location:{output_file}")
-                    else:
-                        logging.warning(f"OLLVM fail to generate: {output_file}")
-
+def compile_binary(console: Console, dataset: ObfuDataset, sample: Sample, override: bool):
+    if sample.binary_file.exists() and not override:
+        console.log(f":check_mark: {sample.binary_file} already compiled")
+    else:
+        console.log(f"compile sample: {sample.binary_file.name}")
+        if dataset.compile(sample):
+            console.log(f":white_check_mark: {sample.binary_file} compiled")
+        else:
+            console.log(f":cross_mark: {sample.binary_file} fail to compile")
 
 @main.command(name="compile")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 @click.option("-p", "--project", type=click.Choice(PROJ_OPT), required=False, default=None, help="Project to download")
-@click.option("-t", "--type", type=click.Choice(BINT_OPT), required=True, help="Type to compile")
+@click.option("-v", "--variant", type=click.Choice(BINT_OPT), required=True, help="Binary variant to compile")
 @click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
 @click.option("-c", "--compiler", type=click.Choice(COMPILER_OPT), default=None, required=False, help="Compiler to use")
 @click.option("--optim", type=click.Choice(OPTIM_OPT), default=None, required=False, help="Optimization level")
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
-def compile(root: str, proj: str, typ: str, obf: str, compiler: str, optim: str, threads: int):
+@click.option('--override', type=int, is_flag=True, default=False, help="Override existing binaries")
+def compile(root: str, project: str, variant: str, obfuscator: str, compiler: str, optim: str, threads: int, override: bool):
     """
-    Compile both plain and obfuscated binaries. OLLVM path and additional parameters should be given
+    Once the obfuscated sources are created, compile both plain and obfuscated binaries. OLLVM path and additional parameters should be given
     through environment variables:
-    * OLLVM_PATH=/home/foo/build/
-    * OLLVM_ARGS="-fpass-plugin=/home/foo/_build/lib/Ollvm.so -Xclang -load -Xclang home/foo/_build/lib/Ollvm.so"
+    * OLLVM_PATH=/home/foo/_build/bin/
+    * OLLVM_ARGS="-fpass-plugin=/home/foo/_build/lib/Ollvm.so -Xclang -load -Xclang /home/foo/_build/lib/Ollvm.so"
 
     :param root: Dataset root
-    :param ollvm_dir: directory where OLLVM is located
+    :param project: Optional project to specify
+    :param variant: Optional mode for compiler, either plain or obfuscated binaries
+    :param obfuscator: Optional obfuscator to specify
+    :param compiler: Optional compiler to specify
+    :param optim: Optional optimization level to specify
+    :param threads: Number of threads to use
+    :param override: Override existing binary
     :return:
     """
     console = Console()
 
-    projects = [Project(proj)] if proj else list(Project)
-    obfuscators = [Obfuscator(obf)] if obf else list(Obfuscator)
+    projects = [Project(project)] if project else list(Project)
+    obfuscators = [Obfuscator(obfuscator)] if obfuscator else list(Obfuscator)
     compilers = [Compiler(compiler)] if compiler else list(Compiler)
     optims = [OptimLevel(optim)] if optim else list(OptimLevel)
 
@@ -399,31 +462,45 @@ def compile(root: str, proj: str, typ: str, obf: str, compiler: str, optim: str,
     dataset = ObfuDataset(root)
 
     # Get the list of samples to compile
-    typ = BinaryType(typ)
+    typ = BinaryType(variant)
     if typ == BinaryType.PLAIN:
         samples = list(dataset.iter_plain_samples(projects, compilers, optims))
     elif typ == BinaryType.OBFUSCATED:
         samples = list(dataset.iter_obfuscated_samples(projects, obfuscators, compilers=compilers, optims=optims))
     else:
         assert False
-
-    for sample in samples:
-        print(f"compile sample: {sample.binary_file.name}")
-        if dataset.compile(sample):
-            console.log(f":white_check_mark: {sample.binary_file} compiled")
-        else:
-            console.log(f":cross_mark: {sample.binary_file} fail to compile")
+    
+    Parallel(n_jobs=threads)(delayed(compile_binary)(console, dataset, sample, override) for sample in samples)
 
 
-# @main.command(name="extract-symbols")
-# @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
-# @click.option('-s', "--script", type=click.Path(), required=True, help="Script to extract symbols")
-# @click.option('-ida', "--ida_path", type=click.Path(), required=True, help="IDA path")
-# def extract_symbols(root, s, ida):
-#     logging.info('Extracting of symbols will start')
-#     all_binaries = Path(root).glob("*")
-#     for (retcode, file) in MultiIDA.map(all_binaries, s, []):
-#         logging.info('Extraction for file:', file, 'ended with return code:', retcode)
+@main.command(name="extract-symbols")
+@click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
+def extract_symbols(root):
+    """
+    Once the obfuscated binaries are compiled, extract their symbols as a dictionnary {fun_addr:fun_name}
+    
+    :param root: Dataset root
+    :return:
+    """
+    console = Console()
+
+    dataset = ObfuDataset(root)
+    # User directly download the plain sources with .exe, .json, .BinExport, .Quokka
+    # No need to reproduce for plain
+    # for sample in dataset.iter_plain_samples(): 
+    #    extract(console, sample.binary_file)
+
+    for sample in dataset.iter_obfuscated_samples():
+        if (not sample.symbols_file.exists()) and sample.binary_file.exists():
+
+            binary = lief.parse(sample.binary_file)
+            gt = {hex(f.address): f.name for f in binary.functions}
+            sample.symbols_file.write_text(json.dumps(gt))
+            if gt:
+                console.log(f":white_check_mark: {sample.symbols_file}")
+            else:
+                console.log(f":cross_mark: {sample.symbols_file}")
+
 
 
 def strip_file(console: Console, file: Path) -> None:
@@ -438,24 +515,71 @@ def strip_file(console: Console, file: Path) -> None:
 @main.command(name="strip")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
 def strip(root):
+    """
+    Once the obfuscated symbols are extracted, strip the binaries
+    
+    :param root: Dataset root
+    :return:
+    """
+    
     console = Console()
 
     dataset = ObfuDataset(root)
-
-    for sample in dataset.iter_plain_samples():
-        strip_file(console, sample.binary_file)
+    # User directly download the plain sources with .exe, .json, .BinExport, .Quokka
+    # No need to reproduce for plain
+    # for sample in dataset.iter_plain_samples():
+    #    strip_file(console, sample.binary_file)
 
     for sample in dataset.iter_obfuscated_samples():
-        strip_file(console, sample.binary_file)
+        if sample.binary_file.exists():
+            strip_file(console, sample.binary_file)
 
 
 
+def export_binary(console: Console, sample: Sample, exporter: str) -> True:
+    out_file = sample.quokka_file if exporter == "Quokka" else sample.binexport_file
+    if out_file.exists():
+        console.log(f"Exported file {out_file} already exists")
+        return True
+    else:
+        if exporter == "Quokka":
+            binary = quokka.Program.from_binary(str(sample.binary_file), timeout=500000)
+        elif exporter == "BinExport":
+            binary = binexport.ProgramBinExport.from_binary_file(sample.binary_file, open_export=False)
+        else:
+            assert False
+
+        if binary:
+            console.log(f":white_check_mark: {sample.binary_file}")
+            return True
+        else:
+            console.log(f":cross_mark: {sample.binary_file}")
+            return False
+
+    
 @main.command(name="export")
-def export():
-    # TODO: Export both with Quokka & Binexport
-    pass
+@click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
+@click.option("-e", "--export", type=click.Choice(['BinExport', 'Quokka']), required=False, default=None, help='Export to execute')
+@click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
+def export(root, export, threads):
+    """
+    Once the binaries are stripped, export them.
+    
+    :param root: Dataset root
+    :param export: Optional export type to specify
+    :param threads: Number of threads to use
+    :return:
+    """
+    
+    exporter = [export] if export else ['BinExport', 'Quokka']
 
+    console = Console()
 
+    dataset = ObfuDataset(root)
+    for e in exporter:
+        console.print(f"Start exporting with: {e}")
+        Parallel(n_jobs=threads, backend='threading')(delayed(export_binary)(console, sample, e) for sample in dataset.iter_obfuscated_samples())
+    
 
 if __name__ == "__main__":
     main()
