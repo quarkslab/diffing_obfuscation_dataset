@@ -1,7 +1,5 @@
 import os
-import random
 import re
-from operator import attrgetter
 from random import Random
 import subprocess
 import shutil
@@ -9,8 +7,6 @@ from obfu_dataset import ObPass, Sample
 from pathlib import Path
 import clang.cindex
 import logging
-import clang
-import pkg_resources
 
 OLLVM_PASS = [
     ObPass.CFF,
@@ -76,23 +72,25 @@ def gen_ollvm_annotated_source(dst_file: Path, sample: Sample, obpass: ObPass, o
 
     # Initialize the Clang index
     libclang = find_libclang()
-    if pkg_resources.get_distribution('clang').version != str(libclang).split('.so.')[-1]:
-        logging.warning("Your clang python package does not match your system file. Please install clang"+libclang.split('.so.')[-1])
-        sys.exit(1)
     if not libclang:
         logging.error("can't find libclang.so")
         return False
 
-    clang.cindex.Config.loaded = False #For an unknown reason, gen_ollvm_annotated_source works the first time it is called, but raises an error at the second time. Need to set it to avoid error (something related to the fact the lib is already loaded).
-    clang.cindex.Config.set_library_file(libclang)
-    index = clang.cindex.Index.create()
+    try:
+        clang.cindex.Config.loaded = False #For an unknown reason, gen_ollvm_annotated_source works the first time it is called, but raises an error at the second time. Need to set it to avoid error (something related to the fact the lib is already loaded).
+        clang.cindex.Config.set_library_file(libclang)
+        index = clang.cindex.Index.create()
+    except Exception:
+        logging.warning("Your clang python bindings does not match your system file."
+                        "Please install: pip install clang==XX")
+        return False
 
     # Read both files
     cname = sample.source_file.name
-    hfile = sample.source_file.with_suffix(".h")
+    hname = sample.header_file.name
     files = {
         cname: open(sample.source_file, 'r').readlines(),
-        hfile.name: open(hfile, "r").readlines()
+        hname: open(sample.header_file, "r").readlines()
     }
 
     # Parse the file with Clang
@@ -128,9 +126,7 @@ def compile_ollvm(sample: Sample) -> bool:
     ollvm_args = os.environ.get("OLLVM_ARGS")
     if ollvm_path.name != "clang":
         ollvm_path = ollvm_path / "clang"
-    if not sample.h_file.exists():
-        src_h_file = sample.root_path / sample.project.value / "sources" / (sample.project.value + ".h")
-        shutil.copy(src_h_file, sample.h_file)
+
     args = [str(ollvm_path),
             f"-{sample.optimization.value}",
             "-lm",

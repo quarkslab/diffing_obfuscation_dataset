@@ -15,7 +15,7 @@ from obfu_dataset import (ObfuDataset, Project, BinaryType,
 REMOTE_NAME = "obfuscation-dataset"
 
 PROJ_OPT = [x.value for x in Project]
-OBFU_EXT_BLACKLIST = [".sqlite"]
+EXT_BLACKLIST = [".sqlite", ".i64"]
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']})
@@ -98,7 +98,7 @@ def make_source_zip(out_file, dir) -> None:
         #for root, dirs, files in base.walk():
         for file_path in base.rglob("*"):
             #file_path = root / file
-            if file_path.is_file():
+            if file_path.is_file() and file_path.suffix not in EXT_BLACKLIST:
                 arcname = Path("sources") / file_path.relative_to(base)
                 zip_file.write(file_path, arcname)
 
@@ -111,7 +111,7 @@ def make_obfuscation_zip(out_file, dir) -> None:
         for file_path in base.rglob("*"):
             #for file in files:
             #    file_path = root / file
-            if file_path.is_file() and file_path.suffix not in OBFU_EXT_BLACKLIST:
+            if file_path.is_file() and file_path.suffix not in EXT_BLACKLIST:
                 arcname = rel / file_path.relative_to(base)
                 zip_file.write(file_path, arcname)
 

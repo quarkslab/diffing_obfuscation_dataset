@@ -37,7 +37,7 @@ dependencies = [
     "quokka-project",
     "rich",
     "lief",
-    "clang==14.0.6", 
+    "clang",
     "joblib",
     "python-binexport", 
     "quokka-project"

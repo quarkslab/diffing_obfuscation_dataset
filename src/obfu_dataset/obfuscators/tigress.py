@@ -47,6 +47,8 @@ def run_tigress(infile: Path,
                 params: list[str],
                 fun_perc: int,
                 split_count: int = -1) -> bool:
+    opaque_passes = [ObPass.OPAQUE, ObPass.CFF_ENCODEARITH_OPAQUE, ObPass.CFF_ENCODEARITH_OPAQUE_SPLIT]
+    split_passes = [ObPass.SPLIT, ObPass.CFF_ENCODEARITH_OPAQUE_SPLIT]
     cmd = [
         "tigress",
         "-D", "_Float64=double",
@@ -55,12 +57,12 @@ def run_tigress(infile: Path,
         "-D", "_Float64x=double",
         "--Environment=x86_64:Linux:Gcc:4.6",
         f"--Seed={seed}",
-        f"--Transform=InitOpaque" if obfu.value == 'opaque' else ""
-        f"--Functions=main" if obfu.value == 'opaque' else ""
+        f"--Transform=InitOpaque" if obfu in opaque_passes else ""
+        f"--Functions=main" if obfu in opaque_passes else ""
         f"--Transform={PASS_CMDLINE[obfu]}" if not params else ""] + \
         params + \
-        [f"--SplitKinds=deep,block,top" if obfu.value == 'split' else "",
-        f"--SplitCount={split_count}" if obfu.value == 'split' else "",
+        [f"--SplitKinds=deep,block,top" if obfu in split_passes else "",
+        f"--SplitCount={split_count}" if obfu in split_passes else "",
         f"--Functions=%{fun_perc}" if not params else "",
         "--out=" + str(outfile),
         str(infile)

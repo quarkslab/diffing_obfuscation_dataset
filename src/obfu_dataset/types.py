@@ -14,7 +14,7 @@ class Obfuscator(Enum):
     OLLVM = "ollvm"
 
 class Compiler(Enum):
-    CLANG = "clang14"
+    CLANG = "clang"
     GCC = "gcc"
     
 class ObPass(Enum):
@@ -211,11 +211,8 @@ class Sample:
         return self.base_dir / (self.basename_bin + ".json")
     
     @property
-    def h_file(self) -> Path:
-        if self.project.value == 'minilua':
-            return self.base_dir / self.basename_bin.with_suffix(".h")
-        else:
-            return self.base_dir / (self.project.value + ".h") 
+    def header_file(self) -> Path:
+        return self.base_dir / (self.basename_src + ".h")
         
     def get_symbols(self) -> dict[int, str]:
         return json.loads(self.symbols_file.read_text())
