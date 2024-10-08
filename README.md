@@ -172,6 +172,12 @@ Similarly, our binaries are obfuscated given a seed. It influences how the obfus
 A sum-up of the dataset is available in the Table below:
 ![dataset_view](./figs/dataset_view.png)
 
+## Compilation vs optimization
+This Section tries to analyze the impact of optimization and compilation on the dataset. Indeed, optimization may alter or remove an applied obfuscation, depending on how the obfuscation was applied. For example, modern compilers, like Clang-14, tend to remove a lot of "old" obfuscation passes such as OLLVM-4 (the last available version) using -O2 optimization level, but also -O0 sometimes (with basic constant propagation).
+As a results, a function compiled with O2 (and sometimes O0) that is considered obfuscated (as the obfuscation was applied on it) will finally not be obfuscated due to compiler side effects. This may be problematic for classification task, where an algorithm is asked to predict if a function is obfuscated or not. In that case, the algorithm is penalized. 
+
+We [SOON-TODO] provide a list of the concerned functions that suffer from this side effect. 
+
 # How to contribute
 
 A dataset is not an immutable amount of data. It should be enriched over time. 
