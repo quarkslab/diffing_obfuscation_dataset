@@ -99,25 +99,7 @@ The ```ls``` command helps the user to manually check what has been downloaded.
 
 ```
 obfu-dataset-cli ls dataset/
-┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━┳━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┓
-┃ Sample                ┃ zlib ┃ lz4 ┃ minilua ┃ sqlite ┃ freetype ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━╇━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━┩
-│ sources               │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|copy          │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|merge         │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|split         │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|CFF           │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|opaque        │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|virtualize    │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|encodearith   │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|encodeliteral │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|mix1          │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ tigress|mix2          │  ✅  │ ❌  │   ❌    │   ❌   │    ❌    │
-│ ollvm  |CFF           │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
-│ ollvm  |opaque        │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
-│ ollvm  |encodearith   │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
-│ ollvm  |mix1          │  ✅  │ ✅  │   ✅    │   ✅   │    ✅    │
-└───────────────────────┴──────┴─────┴─────────┴────────┴──────────┘
+
 ```
 
 These three commands are sufficient for any users that would like to use this dataset. 
