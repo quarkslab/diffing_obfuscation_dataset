@@ -21,7 +21,6 @@ import binexport
 import quokka
 
 # third-party libraries
-from idascript import MultiIDA, iter_binary_files, IDA
 from rich.logging import RichHandler
 from rich.table import Table
 from rich.console import Console
