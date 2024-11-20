@@ -28,6 +28,7 @@ This dataset can be used for many research subject centered around obfuscation, 
 ## Description 
 
 The dataset is organized as follows. 
+The dataset is organized as follows.
 
 ```bash
  dataset
@@ -54,6 +55,18 @@ Currently, the dataset provides:
 - x64 architecture
 - -O0 or -O2 binaries
 
+**File naming convention**
+
+In each directories both source and executable files do follow the following naming convention:
+
+* Sources
+  * plain: `[project].c`
+  * obfuscated: `[project]_[obfuscator]_[compiler]_[arch]_[obfpass]_[level]_[seed].c`  *(for tigress more specifically)*
+* Executables:
+  * plain: `[project]_[compiler]_[arch]_[optim].exe`  *(we use .exe to explicit that it is an executable besides that it is an ELF file)*
+  * obfuscated: `[project]_[obfuscator]_[compiler]_[arch]_[obfpass]_[level]_[seed]_[optim].exe`
+
+    
 ## Usage
 
 This dataset is provided along with a python package that aims to ease data download in particular. It can be installed as follows (preferably inside a virtual env):
@@ -147,7 +160,7 @@ Our binaries are obfuscated depending on a obfuscation level. Such obfuscation l
 
 Similarly, our binaries are obfuscated given a seed. It influences how the obfuscation was applied (see [tigress seed](https://tigress.wtf/top-level.html)).
 
-> Example. The binary "dataset/zlib/obfuscated/tigress/CFF/50/zlib_tigress_gcc_x64_CFF_50_1_O0.exe" indicates that the project zlib was obfuscated using Tigress with a intra-procedural obfuscation that flattens the controlflow. 50% of the functions are obfuscated and the seed is set to 3.
+> Example. The binary "dataset/zlib/obfuscated/tigress/CFF/50/zlib_tigress_gcc_x64_CFF_50_3_O0.exe" indicates that the project zlib was obfuscated using Tigress with a intra-procedural obfuscation that flattens the controlflow. 50% of the functions are obfuscated and the seed is set to 3.
 
 > Notice that the obfuscation level indicates the percentage of functions obfuscated inside a binary. It does not indicate the obfuscation ratio applied within a function. For example, 50% indicates that 50% of the binary function were obfuscated given an obfuscation schema, but it does not mean that 50% of a function content were obfuscated.A sum-up of the dataset is available in the Table below: [TODO].
 
