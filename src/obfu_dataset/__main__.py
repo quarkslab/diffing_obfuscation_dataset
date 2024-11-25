@@ -399,6 +399,11 @@ def create(root: str, project:str, obfuscator:str, threads:int):
                       "Please install it or register the TIGRESS_HOME environment variable.")
         sys.exit(1)
 
+    console.print(f"Be careful, files located in will be overriden: {root}")
+    res = input("continue (Y/N)?: ")
+    if res not in ['Y', 'y', 'Yes', 'yes', 'YES']:
+        sys.exit(1)
+
     dataset = ObfuDataset(root)
     
     projects = [Project(project)] if project else list(Project)
