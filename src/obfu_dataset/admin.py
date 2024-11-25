@@ -10,7 +10,7 @@ from rclone_python.hash_types import HashTypes
 
 # local imports
 from obfu_dataset import (ObfuDataset, Project, BinaryType,
-                          ObPass, Obfuscator, DownloadLink, supported_passes)
+                          ObPass, Obfuscator, DownloadLink, supported_passes, AVAILABLE_LEVELS)
 
 REMOTE_NAME = "obfuscation-dataset"
 
@@ -26,12 +26,13 @@ def main():
 def make_zip_name(project: Project,
                   type: BinaryType,
                   obfuscator: Obfuscator = None,
-                  obpass: ObPass = None):
+                  obpass: ObPass = None,
+                  level: int = None):
     match type:
         case BinaryType.PLAIN:
             return f"{project.value}-sources.zip"
         case BinaryType.OBFUSCATED:
-            return f"{project.value}_{obfuscator.value}_{obpass.value}.zip"
+            return f"{project.value}_{obfuscator.value}_{obpass.value}_{level}.zip"
 
 
 def get_info_remote_file(remote_path: str) -> tuple[str, int, str] | None:
@@ -56,7 +57,8 @@ def mk_links(out: str):
             "size": entry.size,
             "hash": entry.hash,
             "obfuscator": entry.obfuscator.value if entry.obfuscator else None,
-            "obpass": entry.obpass.value if entry.obpass else None
+            "obpass": entry.obpass.value if entry.obpass else None,
+            "level": entry.level if entry.level else None
         }
 
     d = {}
@@ -78,13 +80,14 @@ def mk_links(out: str):
         for obfu in Obfuscator:
             d[project.value]['obfuscated'][obfu.value] = {}
             for obpass in supported_passes(obfu):
-                # Get info from remote file
-                zip_name = make_zip_name(project, BinaryType.OBFUSCATED, obfu, obpass)
-                remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{project.value}/obfuscated/{obfu.value}/{zip_name}"
-                url, size, hash = get_info_remote_file(remote_path)
-                # Create DownloadLink object
-                entry = DownloadLink(project, BinaryType.OBFUSCATED, url, size, hash, obfu, obpass)
-                d[project.value]['obfuscated'][obfu.value][obpass.value] = to_json(entry)
+                for level in AVAILABLE_LEVELS:
+                    # Get info from remote file
+                    zip_name = make_zip_name(project, BinaryType.OBFUSCATED, obfu, obpass, level)
+                    remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{project.value}/obfuscated/{obfu.value}/{zip_name}"
+                    url, size, hash = get_info_remote_file(remote_path)
+                    # Create DownloadLink object
+                    entry = DownloadLink(project, BinaryType.OBFUSCATED, url, size, hash, obfu, obpass, level)
+                    d[project.value]['obfuscated'][obfu.value][obpass.value] = to_json(entry)
 
 
     # Write the resulting json file
@@ -148,12 +151,13 @@ def upload(project: str, type: str, override: bool, upload: bool, root: str):
             # check obfuscated
             for obfu in Obfuscator:
                 for obpass in supported_passes(obfu):
-                    obfu_dir = dataset.get_obfu_path(proj, obfu, obpass)
-                    obpass_zip = obfu_dir.parent / make_zip_name(proj, BinaryType.OBFUSCATED, obfu, obpass)
-                    if not obpass_zip.exists():
-                        print(f"Create zip: {obpass_zip}")
-                        make_obfuscation_zip(obpass_zip, obfu_dir)
-                    remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{proj.value}/obfuscated/{obfu.value}/"
+                    for level in AVAILABLE_LEVELS:
+                        obfu_dir = dataset.get_obfu_path(proj, obfu, obpass, level)
+                        obpass_zip = obfu_dir.parent / make_zip_name(proj, BinaryType.OBFUSCATED, obfu, obpass, level)
+                        if not obpass_zip.exists():
+                            print(f"Create zip: {obpass_zip}")
+                            make_obfuscation_zip(obpass_zip, obfu_dir)
+                        remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{proj.value}/obfuscated/{obfu.value}/"
 
                     # Copy only if not present
                     if upload:

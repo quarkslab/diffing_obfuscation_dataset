@@ -22,21 +22,23 @@ class DownloadLink:
     hash: str
     obfuscator: Obfuscator | None = None
     obpass: ObPass | None = None
-
+    level: int | None = None
 
 def get_download_link(project: Project,
                       type: BinaryType,
                       obfuscator: Obfuscator = None,
-                      obpass: ObPass = None) -> DownloadLink|None:
+                      obpass: ObPass = None,
+                      level: int = None) -> DownloadLink | None:
     try:
         if type == BinaryType.PLAIN:
             raw_item = _precompiled[project.value]["sources"]
             package = DownloadLink(**raw_item)
         elif type == BinaryType.OBFUSCATED:
-            raw_item = _precompiled[project.value][type.value][obfuscator.value][obpass.value]
+            raw_item = _precompiled[project.value][type.value][obfuscator.value][obpass.value][str(level)]
             package = DownloadLink(**raw_item)
             package.obfuscator = obfuscator
             package.obpass = obpass
+            package.level = level
         else:
             assert False
         package.project = Project(package.project)

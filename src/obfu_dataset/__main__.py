@@ -8,10 +8,9 @@ from functools import partial
 from pathlib import Path
 from threading import Event
 from urllib.request import urlopen
-from urllib.error import URLError, HTTPError
+from urllib.error import URLError
 import signal
 import hashlib
-from subprocess import PIPE
 import tempfile
 import sys
 import lief
@@ -37,8 +36,8 @@ from rich.progress import (
 
 from obfu_dataset.types import BinaryType
 # local imports
-from obfu_dataset import get_download_link, DownloadLink, Sample
-from obfu_dataset.types import Project, Obfuscator, ObPass, OptimLevel, Architecture, Compiler
+from obfu_dataset import get_download_link, DownloadLink, Sample, AVAILABLE_LEVELS
+from obfu_dataset.types import Project, Obfuscator, ObPass, OptimLevel, Compiler
 from obfu_dataset.dataset import ObfuDataset
 from obfu_dataset.obfuscators.ollvm import OLLVM_PASS, gen_ollvm_annotated_source
 from obfu_dataset.obfuscators.tigress import TIGRESS_PASS, check_tigress_environ, run_tigress, get_merge_parameters, \
@@ -114,7 +113,7 @@ def ls(root: str):
         Obfuscator.OLLVM: OLLVM_PASS
     }
 
-    emoji = lambda x: ":white_check_mark:" if x else ":cross_mark:"
+    emoji = lambda x: ":white_check_mark:" if x else (":cross_mark:" if bool(x) == 0 else "~")
 
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Sample")#, style="dim", width=12)
@@ -131,8 +130,21 @@ def ls(root: str):
         oname = obfuscator.value
         for obpass in available_passes[obfuscator]:
             pname = obpass.value
-            #items = [emoji(next(dataset.iter_obfuscated_samples([x], [obfuscator], [obpass])).exists) for x in Project]
-            items = [emoji(bool(list(dataset.get_obfu_path(x, obfuscator, obpass).iterdir()))) for x in Project]
+
+            # items = [emoji(bool(list(dataset.get_obfu_path(x, obfuscator, obpass).iterdir()))) for x in Project]
+
+            items = []
+            for proj in Project:
+                alls = []
+                for level in AVAILABLE_LEVELS:
+                    alls.append(bool(list(dataset.get_obfu_path(proj, obfuscator, obpass, level).iterdir())))
+                if all(alls):
+                    items.append(emoji(1))
+                elif any(alls):
+                    items.append(emoji(-1))
+                else:
+                    items.append(emoji(0))
+
             first = f"{oname}{' '*(longest_obf-len(oname))}|{pname}{' '*(longest_pass-len(pname))}"
             table.add_row(first, *items)
 
@@ -198,6 +210,7 @@ def download_one_package(progress: Progress,
             package.project,
             package.obfuscator,
             package.obpass,
+            package.level,
             filepath)
 
     if res:
@@ -215,11 +228,13 @@ def download_packages(root: str,
                    type: BinaryType,
                    projects: list[Project],
                    obfuscators: list[Obfuscator],
-                   obpass: list[ObPass]):
+                   obpass: list[ObPass],
+                   levels: list[int]):
 
     projects = list(Project) if not projects else projects
     obfuscators = list(Obfuscator) if not obfuscators else obfuscators
     obpasses = list(ObPass) if not obpass else obpass
+    levels = list(AVAILABLE_LEVELS) if not levels else levels
 
     # Get the list of all packages to download
     if type == BinaryType.PLAIN:
@@ -229,7 +244,8 @@ def download_packages(root: str,
         for project in projects:
             for obfuscator in obfuscators:
                 for opass in (x for x in obpasses if x in OBFU_PASSES[obfuscator]):
-                    packages.append(get_download_link(project, BinaryType.OBFUSCATED, obfuscator, opass))
+                    for level in levels:
+                        packages.append(get_download_link(project, BinaryType.OBFUSCATED, obfuscator, opass, level))
 
     # Instanciate a progress bar
     progress = Progress(
@@ -296,7 +312,8 @@ def download_plain(root: str, threads: int, project: tuple[str]):
 @click.option("-p", "--project", type=click.Choice(PROJ_OPT), required=True, help="Project to download")
 @click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
 @click.option("-op", "--obf-pass", type=click.Choice(PASS_OPT), default=None, required=False, help="Obfuscation pass to download (all if none)")
-def download_obfuscated(root: str, threads: int, project: str, obfuscator: str | None, obf_pass: str | None):
+@click.option("-l", "--level", type=click.Choice(AVAILABLE_LEVELS), default=None, required=False, help="Obfuscation levels to download")
+def download_obfuscated(root: str, threads: int, project: str, obfuscator: str | None, obf_pass: str | None, level: int | None):
     """
     Download only obfuscated zip files
     
@@ -305,14 +322,16 @@ def download_obfuscated(root: str, threads: int, project: str, obfuscator: str |
     :param project: Optional project to specify
     :param obfuscator: Optional obfuscator to specify
     :param obf_pass: Optional obfuscation pass to specify
+    :param level: Optional obfuscation level to download
     :return:
     """
 
     project = [Project(project)]
     obfuscator = [Obfuscator(obfuscator)] if obfuscator else list(Obfuscator)
     obf_pass = [ObPass(obf_pass)] if obf_pass else list(ObPass)
+    levels = [level] if level else AVAILABLE_LEVELS
 
-    download_packages(root, threads, BinaryType.OBFUSCATED, project, obfuscator, obf_pass)
+    download_packages(root, threads, BinaryType.OBFUSCATED, project, obfuscator, obf_pass, levels)
 
 
 @main.command(name="download-all")
@@ -326,8 +345,8 @@ def download_all(root: str, threads: int):
     :param threads: Number of threads to use
     :return:
     """
-    download_packages(root, threads, BinaryType.PLAIN, [], [], [])
-    download_packages(root, threads, BinaryType.OBFUSCATED, [], [], [])
+    download_packages(root, threads, BinaryType.PLAIN, [], [], [], [])
+    download_packages(root, threads, BinaryType.OBFUSCATED, [], [], [], [])
 
 
 def create_one_obfuscated(dataset: ObfuDataset, console: Console, obfu_sample: Sample) -> bool:
@@ -381,7 +400,7 @@ def create_one_obfuscated(dataset: ObfuDataset, console: Console, obfu_sample: S
 @click.option("-p", "--project", type=click.Choice(PROJ_OPT), required=False, default=None, help="Project to download")
 @click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
 @click.option('-t', '--threads', type=int, default=3, help="Number of downloading threads")
-def create(root: str, project:str, obfuscator:str, threads:int):
+def create(root: str, project: str, obfuscator: str, threads: int):
     """
     Recreate the source files for the dataset
     
@@ -424,6 +443,7 @@ def compile_binary(console: Console, dataset: ObfuDataset, sample: Sample, overr
             console.log(f":white_check_mark: {sample.binary_file} compiled")
         else:
             console.log(f":cross_mark: {sample.binary_file} fail to compile")
+
 
 @main.command(name="compile")
 @click.option('-r', "--root", type=click.Path(), required=True, help="Dataset root directory")
@@ -537,7 +557,6 @@ def strip(root):
     for sample in dataset.iter_obfuscated_samples():
         if sample.binary_file.exists():
             strip_file(console, sample.binary_file)
-
 
 
 def export_binary(console: Console, sample: Sample, exporter: str) -> True:

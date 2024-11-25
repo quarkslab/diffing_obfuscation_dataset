@@ -44,6 +44,9 @@ class ObfuDataset(object):
                 for ob_pass in passes:
                     ob_pass_dir = obfu_dir / ob_pass.value
                     ob_pass_dir.mkdir(parents=True, exist_ok=True)
+                    for level in AVAILABLE_LEVELS:
+                        level_dir = ob_pass_dir / str(level)
+                        level_dir.mkdir(parents=True, exist_ok=True)
 
     def add_source_zip(self, project: Project, zipfile: Path) -> bool:
         extract_dir = self.get_src_path(project).parent
@@ -69,11 +72,11 @@ class ObfuDataset(object):
     def get_src_path(self, project: Project):
         return self.root_path / project.value / SOURCES
 
-    def get_obfu_path(self, project: Project, obfuscator: Obfuscator, obfpass: ObPass):
-        return self.root_path / project.value / OBFUSCATED / obfuscator.value / obfpass.value
+    def get_obfu_path(self, project: Project, obfuscator: Obfuscator, obfpass: ObPass, level: int):
+        return self.root_path / project.value / OBFUSCATED / obfuscator.value / obfpass.value / str(level)
 
-    def add_obfuscated_zip(self, project: Project, obfuscator: Obfuscator, obpass: ObPass, zipfile: Path) -> bool:
-        extract_dir = self.get_obfu_path(project, obfuscator, obpass).parent
+    def add_obfuscated_zip(self, project: Project, obfuscator: Obfuscator, obpass: ObPass, level: int, zipfile: Path) -> bool:
+        extract_dir = self.get_obfu_path(project, obfuscator, obpass, level).parent
         if self._unzip_into(zipfile, extract_dir):
             if list(extract_dir.iterdir()):
                 # Files are now present in that directory
@@ -172,9 +175,6 @@ class ObfuDataset(object):
                                             seed=seed,
                                             root_path=self.root_path
                                         )
-
-    def _fetch_url(self, url: str) -> Path:
-        pass
 
     def get_symbols(self, proj: Project) -> dict[int, str]:
         sample = self.get_plain_sample(proj)
