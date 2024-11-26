@@ -159,10 +159,10 @@ def upload(project: str, type: str, override: bool, upload: bool, root: str):
                             make_obfuscation_zip(obpass_zip, obfu_dir)
                         remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{proj.value}/obfuscated/{obfu.value}/"
 
-                    # Copy only if not present
-                    if upload:
-                        print(f"Remote copy: {obpass_zip}")
-                        rclone.copy(str(obpass_zip.resolve()), remote_path, ignore_existing=not override)
+                        # Copy only if not present
+                        if upload:
+                            print(f"Remote copy: {obpass_zip}")
+                            rclone.copy(str(obpass_zip.resolve()), remote_path, ignore_existing=not override)
 
 
 if __name__ == "__main__":
