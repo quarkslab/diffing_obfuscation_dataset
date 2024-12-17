@@ -39,6 +39,7 @@ def get_download_link(project: Project,
             package.obfuscator = obfuscator
             package.obpass = obpass
             package.level = level
+            package.size = raw_item['size']
         else:
             assert False
         package.project = Project(package.project)

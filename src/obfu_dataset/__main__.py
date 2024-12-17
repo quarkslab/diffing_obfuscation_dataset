@@ -329,7 +329,7 @@ def download_obfuscated(root: str, threads: int, project: str, obfuscator: str |
     project = [Project(project)]
     obfuscator = [Obfuscator(obfuscator)] if obfuscator else list(Obfuscator)
     obf_pass = [ObPass(obf_pass)] if obf_pass else list(ObPass)
-    levels = [level] if level else AVAILABLE_LEVELS
+    levels = [int(level)] if level else AVAILABLE_LEVELS
 
     download_packages(root, threads, BinaryType.OBFUSCATED, project, obfuscator, obf_pass, levels)
 
