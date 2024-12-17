@@ -4,140 +4,155 @@
       "project": "zlib",
       "type": "plain",
       "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/zlib-sources.zip",
-      "size": 1141275,
-      "hash": "f8b79a233ae5f59514901d151efe5077",
+      "size": 1141907,
+      "hash": "ed9679a6cafc6486d3dde1fd101c0f70",
       "obfuscator": null,
-      "obpass": null
+      "obpass": null,
+      "level": null
     },
     "obfuscated": {
       "tigress": {
         "copy": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_copy.zip",
-          "size": 109259546,
-          "hash": "f0dfc02de04626e8ec7d8c6526ef3c24",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_copy_100.zip",
+          "size": 12165552,
+          "hash": "965ed863592fa5097372865981ce09d3",
           "obfuscator": "tigress",
-          "obpass": "copy"
+          "obpass": "copy",
+          "level": 100
         },
         "merge": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_merge.zip",
-          "size": 100558907,
-          "hash": "40b269a14ed568e1af394588e6987c47",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_merge_100.zip",
+          "size": 10426075,
+          "hash": "3b09e044805d75d5b28a6e1cdaa1cd7e",
           "obfuscator": "tigress",
-          "obpass": "merge"
+          "obpass": "merge",
+          "level": 100
         },
         "split": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_split.zip",
-          "size": 104734545,
-          "hash": "1a4448a7bffff9d3575621b68cc301c5",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_split_100.zip",
+          "size": 11086484,
+          "hash": "cc4d8cfa6dfe8bd0a013dc121e6035da",
           "obfuscator": "tigress",
-          "obpass": "split"
+          "obpass": "split",
+          "level": 100
         },
         "CFF": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_CFF.zip",
-          "size": 119970145,
-          "hash": "c42f8c6f4cb0cdd9087463c5484eccf2",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_CFF_100.zip",
+          "size": 13929035,
+          "hash": "bf30d60e19762626d1321e8d3462aa9b",
           "obfuscator": "tigress",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_opaque.zip",
-          "size": 98251344,
-          "hash": "2a7edbe4e39736a9705997d437311d19",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_opaque_100.zip",
+          "size": 10052293,
+          "hash": "05cc39bd3c47c58287d5efbd693c973a",
           "obfuscator": "tigress",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "virtualize": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_virtualize.zip",
-          "size": 155801947,
-          "hash": "a9fc464506de5018b257a9c3d8578f54",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_virtualize_100.zip",
+          "size": 19826295,
+          "hash": "58f7cdf32a9f85e075a8141d2f5c529d",
           "obfuscator": "tigress",
-          "obpass": "virtualize"
+          "obpass": "virtualize",
+          "level": 100
         },
         "encodearith": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_encodearith.zip",
-          "size": 105021714,
-          "hash": "cf44cfa172bedbbb11869c4cae025aeb",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_encodearith_100.zip",
+          "size": 11182260,
+          "hash": "1cd604c5bacdd5469557b71905e17d97",
           "obfuscator": "tigress",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "encodeliteral": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_encodeliteral.zip",
-          "size": 97184702,
-          "hash": "a0815ead089a1ca2ab6d0fd92501fec2",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_encodeliteral_100.zip",
+          "size": 10084040,
+          "hash": "137652ec7103d17d9c236a0b0f532af1",
           "obfuscator": "tigress",
-          "obpass": "encodeliteral"
+          "obpass": "encodeliteral",
+          "level": 100
         },
         "mix1": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_mix1.zip",
-          "size": 133359668,
-          "hash": "2e93c11ef0668e20fc9189c09e6aaf43",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_mix1_100.zip",
+          "size": 15888665,
+          "hash": "6760d850a0bb82a77e545c761ae126b0",
           "obfuscator": "tigress",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         },
         "mix2": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_mix2.zip",
-          "size": 137761403,
-          "hash": "1192712e5749e16fb8a6683ba298845b",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/tigress/zlib_tigress_mix2_100.zip",
+          "size": 16683848,
+          "hash": "476088f19be42c6ea1dd7fa34adf5502",
           "obfuscator": "tigress",
-          "obpass": "mix2"
+          "obpass": "mix2",
+          "level": 100
         }
       },
       "ollvm": {
         "CFF": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_CFF.zip",
-          "size": 95989995,
-          "hash": "b503e851286cea674dbcdabcd755d303",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_CFF_100.zip",
+          "size": 9194012,
+          "hash": "d9959d633b7fa5d4095049fbe4d21b3d",
           "obfuscator": "ollvm",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_opaque.zip",
-          "size": 81029440,
-          "hash": "e99b29510a5d7ddd9b9baedacb1b4617",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_opaque_100.zip",
+          "size": 8406679,
+          "hash": "fee28bd341a0a0111963bad0d78d133e",
           "obfuscator": "ollvm",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "encodearith": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_encodearith.zip",
-          "size": 65126982,
-          "hash": "0d07a6e6345d86e3a9a47ac893a70468",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_encodearith_100.zip",
+          "size": 6381850,
+          "hash": "f3074af7a25f15cb328119dc3449e896",
           "obfuscator": "ollvm",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "mix1": {
           "project": "zlib",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_mix1.zip",
-          "size": 140264038,
-          "hash": "fd6d9d8633f02d7d712f236cca8d0f12",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/zlib/obfuscated/ollvm/zlib_ollvm_mix1_100.zip",
+          "size": 15478138,
+          "hash": "a77c7d272c17b415bb58412711161931",
           "obfuscator": "ollvm",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         }
       }
     }
@@ -150,137 +165,152 @@
       "size": 3651949,
       "hash": "dd063788f49f21aad4934b3926096d4f",
       "obfuscator": null,
-      "obpass": null
+      "obpass": null,
+      "level": null
     },
     "obfuscated": {
       "tigress": {
         "copy": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_copy.zip",
-          "size": 308053635,
-          "hash": "31d004aaa0217e435115ff580f3b5e8e",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_copy_100.zip",
+          "size": 38575354,
+          "hash": "7166bc0e3ff79868c2c6b55d15754517",
           "obfuscator": "tigress",
-          "obpass": "copy"
+          "obpass": "copy",
+          "level": 100
         },
         "merge": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_merge.zip",
-          "size": 238201539,
-          "hash": "82be1233af1f356705d8763707d67d7f",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_merge_100.zip",
+          "size": 24896993,
+          "hash": "d53fcec44f876bcf545f27a3e326fb54",
           "obfuscator": "tigress",
-          "obpass": "merge"
+          "obpass": "merge",
+          "level": 100
         },
         "split": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_split.zip",
-          "size": 206575535,
-          "hash": "09c6e842f35da7564f2a9db8c890f5d7",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_split_100.zip",
+          "size": 19441760,
+          "hash": "b6ba0346a8bf21cef6d5a9610612d38a",
           "obfuscator": "tigress",
-          "obpass": "split"
+          "obpass": "split",
+          "level": 100
         },
         "CFF": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_CFF.zip",
-          "size": 405791235,
-          "hash": "0407fd42a8fdd84aa475c9f950e1ad83",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_CFF_100.zip",
+          "size": 57252836,
+          "hash": "d284be172fa074c15690017021ff1c3c",
           "obfuscator": "tigress",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_opaque.zip",
-          "size": 244440260,
-          "hash": "4747d75846da4c92e4244041152c5e47",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_opaque_100.zip",
+          "size": 26954360,
+          "hash": "62b58f9b5774b260f81273d68a28b741",
           "obfuscator": "tigress",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "virtualize": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_virtualize.zip",
-          "size": 707444541,
-          "hash": "bfb0e4efafbceaab02c89749e4a9cf5d",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_virtualize_100.zip",
+          "size": 114233176,
+          "hash": "8b23c66de3b2607f3ab2cf0c8ad6cfab",
           "obfuscator": "tigress",
-          "obpass": "virtualize"
+          "obpass": "virtualize",
+          "level": 100
         },
         "encodearith": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_encodearith.zip",
-          "size": 257797806,
-          "hash": "349dcd8afb59addccf470a6557e7a8d8",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_encodearith_100.zip",
+          "size": 28021490,
+          "hash": "20e1f56fc9fae1e97bf490b164b7114f",
           "obfuscator": "tigress",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "encodeliteral": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_encodeliteral.zip",
-          "size": 226712836,
-          "hash": "06ca9512ddbde798f04b8014764f610c",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_encodeliteral_100.zip",
+          "size": 22722722,
+          "hash": "9918a187919f670fe29bcd9e25389386",
           "obfuscator": "tigress",
-          "obpass": "encodeliteral"
+          "obpass": "encodeliteral",
+          "level": 100
         },
         "mix1": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_mix1.zip",
-          "size": 256292440,
-          "hash": "02fb84edcebc5e8d6b85a7e038abd070",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_mix1_100.zip",
+          "size": 28354358,
+          "hash": "1c8ad983fd2f21ea379ed51bef20dda4",
           "obfuscator": "tigress",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         },
         "mix2": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_mix2.zip",
-          "size": 264334006,
-          "hash": "45265ea96dedb0e93bcf44a75be64ec5",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/tigress/lz4_tigress_mix2_100.zip",
+          "size": 29749172,
+          "hash": "ad00c64ce2251f58b99df660097ea3b4",
           "obfuscator": "tigress",
-          "obpass": "mix2"
+          "obpass": "mix2",
+          "level": 100
         }
       },
       "ollvm": {
         "CFF": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_CFF.zip",
-          "size": 214109085,
-          "hash": "b2abbfbf5cd6f6b6bec53b2ced400a15",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_CFF_100.zip",
+          "size": 19405083,
+          "hash": "15e36874d7db8f910764cf07c281e365",
           "obfuscator": "ollvm",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_opaque.zip",
-          "size": 222513409,
-          "hash": "2d1aea86bac5e5db8119472f9931a45b",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_opaque_100.zip",
+          "size": 20966781,
+          "hash": "0c335552de82773cfbe4314a0f8d0dcb",
           "obfuscator": "ollvm",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "encodearith": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_encodearith.zip",
-          "size": 198932646,
-          "hash": "7a63ddaee756c6c4cb45bec3b97516e6",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_encodearith_100.zip",
+          "size": 18321175,
+          "hash": "432fe3a8967b06acf49a3c9d7bc4e1ec",
           "obfuscator": "ollvm",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "mix1": {
           "project": "lz4",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_mix1.zip",
-          "size": 253767863,
-          "hash": "0e07d2e069e13de1946244a4247b6b19",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/lz4/obfuscated/ollvm/lz4_ollvm_mix1_100.zip",
+          "size": 23501920,
+          "hash": "fae106b1494cdd10c2c07d43fce81c09",
           "obfuscator": "ollvm",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         }
       }
     }
@@ -293,137 +323,152 @@
       "size": 3875947,
       "hash": "7902f0cf13969d3dc354870a5f52590d",
       "obfuscator": null,
-      "obpass": null
+      "obpass": null,
+      "level": null
     },
     "obfuscated": {
       "tigress": {
         "copy": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_copy.zip",
-          "size": 271037577,
-          "hash": "43c65d2203a9f2b4aceaf42aff96431a",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_copy_100.zip",
+          "size": 31956340,
+          "hash": "155a322da2d69d9ac2f5277b442fc441",
           "obfuscator": "tigress",
-          "obpass": "copy"
+          "obpass": "copy",
+          "level": 100
         },
         "merge": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_merge.zip",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_merge_100.zip",
           "size": 22,
           "hash": "76cdb2bad9582d23c1f6f4d868218d6c",
           "obfuscator": "tigress",
-          "obpass": "merge"
+          "obpass": "merge",
+          "level": 100
         },
         "split": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_split.zip",
-          "size": 274258074,
-          "hash": "7c347b5d9c4fdadd0ca66383dd1ea810",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_split_100.zip",
+          "size": 31689818,
+          "hash": "0bcae3fefd3c441b09812f51fb9dae09",
           "obfuscator": "tigress",
-          "obpass": "split"
+          "obpass": "split",
+          "level": 100
         },
         "CFF": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_CFF.zip",
-          "size": 303612121,
-          "hash": "915b43ef6d3cc5a43ba3fadb9b2e6d1d",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_CFF_100.zip",
+          "size": 37174615,
+          "hash": "db1f1ad1944c790a0639984af9c46403",
           "obfuscator": "tigress",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_opaque.zip",
-          "size": 233591426,
-          "hash": "f4629c6cf9aacbc6a018a5c9e47b7d8e",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_opaque_100.zip",
+          "size": 24759800,
+          "hash": "5f8f82385286a07945be66a78a2e7c6f",
           "obfuscator": "tigress",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "virtualize": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_virtualize.zip",
-          "size": 644203205,
-          "hash": "2b11c87e416baf6f869935287a05f444",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_virtualize_100.zip",
+          "size": 100705282,
+          "hash": "358c8c3c00989a6a40a11bb754f55943",
           "obfuscator": "tigress",
-          "obpass": "virtualize"
+          "obpass": "virtualize",
+          "level": 100
         },
         "encodearith": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_encodearith.zip",
-          "size": 227878123,
-          "hash": "d6b03116911f40dddeba77e3a54a5da1",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_encodearith_100.zip",
+          "size": 23749823,
+          "hash": "5da7483d7b152a09751fd217e8b439f9",
           "obfuscator": "tigress",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "encodeliteral": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_encodeliteral.zip",
-          "size": 232722798,
-          "hash": "2ea622f9cc7d127c5c468d92d13cb6f1",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_encodeliteral_100.zip",
+          "size": 24699379,
+          "hash": "87427eceb129c281c162d9bc82e75f24",
           "obfuscator": "tigress",
-          "obpass": "encodeliteral"
+          "obpass": "encodeliteral",
+          "level": 100
         },
         "mix1": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_mix1.zip",
-          "size": 341316818,
-          "hash": "2836972e286c9babfcb6a62f2946e58a",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_mix1_100.zip",
+          "size": 44035154,
+          "hash": "4bc0014dcb23eb3e61186adcd6ce2947",
           "obfuscator": "tigress",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         },
         "mix2": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_mix2.zip",
-          "size": 375285210,
-          "hash": "b871ae5d66dcea5f9a1bdf7ce5077f17",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/tigress/minilua_tigress_mix2_100.zip",
+          "size": 50380263,
+          "hash": "1b9f74f49a5444d1d78326f067c2353e",
           "obfuscator": "tigress",
-          "obpass": "mix2"
+          "obpass": "mix2",
+          "level": 100
         }
       },
       "ollvm": {
         "CFF": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_CFF.zip",
-          "size": 363470904,
-          "hash": "166120fdb0064e9865401bed6ee81ce4",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_CFF_100.zip",
+          "size": 47020491,
+          "hash": "41626271d46fc389f66e2a12783ee999",
           "obfuscator": "ollvm",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_opaque.zip",
-          "size": 298555120,
-          "hash": "ac9944fc6de9718d87cf3c3e3587443d",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_opaque_100.zip",
+          "size": 35243517,
+          "hash": "ac7e0038113b4a6abd5ed1678f12c78f",
           "obfuscator": "ollvm",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "encodearith": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_encodearith.zip",
-          "size": 241013330,
-          "hash": "8450778a3e046f76e0a813f3c3473226",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_encodearith_100.zip",
+          "size": 25181203,
+          "hash": "a059ad194089767c3b79006e7a7b6c80",
           "obfuscator": "ollvm",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "mix1": {
           "project": "minilua",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_mix1.zip",
-          "size": 531774017,
-          "hash": "891c7a58043c328e40f1958479b57c4e",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/minilua/obfuscated/ollvm/minilua_ollvm_mix1_100.zip",
+          "size": 77315053,
+          "hash": "68bdc0209d65d093bab1146fd23a2bee",
           "obfuscator": "ollvm",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         }
       }
     }
@@ -436,137 +481,152 @@
       "size": 15499852,
       "hash": "9b30cacf8cff09d38d8eb4d5935f4cff",
       "obfuscator": null,
-      "obpass": null
+      "obpass": null,
+      "level": null
     },
     "obfuscated": {
       "tigress": {
         "copy": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_copy.zip",
-          "size": 1014923870,
-          "hash": "52dfc5aaa43c6b4e9856a73e0f2172c8",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_copy_100.zip",
+          "size": 116924861,
+          "hash": "a99fd8a233c4fcd1cedbb69dc983805c",
           "obfuscator": "tigress",
-          "obpass": "copy"
+          "obpass": "copy",
+          "level": 100
         },
         "merge": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_merge.zip",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_merge_100.zip",
           "size": 22,
           "hash": "76cdb2bad9582d23c1f6f4d868218d6c",
           "obfuscator": "tigress",
-          "obpass": "merge"
+          "obpass": "merge",
+          "level": 100
         },
         "split": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_split.zip",
-          "size": 938195376,
-          "hash": "33692829b268bcd59d011193e8669f41",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_split_100.zip",
+          "size": 102772351,
+          "hash": "b17ea1c061df3370d196cbbe4e3b0522",
           "obfuscator": "tigress",
-          "obpass": "split"
+          "obpass": "split",
+          "level": 100
         },
         "CFF": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_CFF.zip",
-          "size": 1088367578,
-          "hash": "1b93229a889fe86513175de82580b69e",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_CFF_100.zip",
+          "size": 128787753,
+          "hash": "3bd2fad6268f3a4aac43b3aa7f9ac5b0",
           "obfuscator": "tigress",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_opaque.zip",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_opaque_100.zip",
           "size": 22,
           "hash": "76cdb2bad9582d23c1f6f4d868218d6c",
           "obfuscator": "tigress",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "virtualize": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_virtualize.zip",
-          "size": 1421722657,
-          "hash": "64b5f2585f61b818673487f9b4f3700e",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_virtualize_100.zip",
+          "size": 260447088,
+          "hash": "48c4ce10c98a6d3f557114c4691820a6",
           "obfuscator": "tigress",
-          "obpass": "virtualize"
+          "obpass": "virtualize",
+          "level": 100
         },
         "encodearith": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_encodearith.zip",
-          "size": 875982718,
-          "hash": "73263737815113b3d4d76ff71b977b1e",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_encodearith_100.zip",
+          "size": 93390679,
+          "hash": "50807208a367dc618a624bc05f8d7179",
           "obfuscator": "tigress",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "encodeliteral": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_encodeliteral.zip",
-          "size": 866588690,
-          "hash": "f406cfb6066f832b94b3fb4edf4084c2",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_encodeliteral_100.zip",
+          "size": 88991160,
+          "hash": "c0ea99b4319d14c1fee51fe925d36721",
           "obfuscator": "tigress",
-          "obpass": "encodeliteral"
+          "obpass": "encodeliteral",
+          "level": 100
         },
         "mix1": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_mix1.zip",
-          "size": 987928156,
-          "hash": "f540a47abd8b8bf1fd06f52d36061bb6",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_mix1_100.zip",
+          "size": 82920065,
+          "hash": "66ad07e82e65b35649db7b6d59bd6936",
           "obfuscator": "tigress",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         },
         "mix2": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_mix2.zip",
-          "size": 1049181449,
-          "hash": "2ba828c1565cd219a5f6e89d9ba33041",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/tigress/sqlite_tigress_mix2_100.zip",
+          "size": 91071648,
+          "hash": "347e0b97761b0ddaf48657a87e0be956",
           "obfuscator": "tigress",
-          "obpass": "mix2"
+          "obpass": "mix2",
+          "level": 100
         }
       },
       "ollvm": {
         "CFF": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_CFF.zip",
-          "size": 1423636329,
-          "hash": "730705c90a7449064d1753a15cc46584",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_CFF_100.zip",
+          "size": 130474596,
+          "hash": "2fa24e11ae6b3fdb71d60fd62e8681f6",
           "obfuscator": "ollvm",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_opaque.zip",
-          "size": 1183821251,
-          "hash": "cb72cab6fd657bee63d487eaa38838e2",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_opaque_100.zip",
+          "size": 120967509,
+          "hash": "bf86fc2dcb51fedfc09d8fa01a72e96f",
           "obfuscator": "ollvm",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "encodearith": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_encodearith.zip",
-          "size": 933595921,
-          "hash": "f889af9c7b40dcdc2011dc22b0f69370",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_encodearith_100.zip",
+          "size": 90367955,
+          "hash": "b3ec871aab8e70296d7043fc011e64c8",
           "obfuscator": "ollvm",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "mix1": {
           "project": "sqlite",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_mix1.zip",
-          "size": 1453122276,
-          "hash": "311d678aabc617dd6b603b52bcb8b22f",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/sqlite/obfuscated/ollvm/sqlite_ollvm_mix1_100.zip",
+          "size": 313610266,
+          "hash": "4eea466beec0e0b4df35dc3f1cc64590",
           "obfuscator": "ollvm",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         }
       }
     }
@@ -579,137 +639,152 @@
       "size": 8979204,
       "hash": "d0e3b27c02e23490e33b977bcae1f5ba",
       "obfuscator": null,
-      "obpass": null
+      "obpass": null,
+      "level": null
     },
     "obfuscated": {
       "tigress": {
         "copy": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_copy.zip",
-          "size": 963761316,
-          "hash": "543d00b4369565e90f3304b5ed9dcae7",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_copy_100.zip",
+          "size": 106677258,
+          "hash": "fc8462edaad05e058a607c974e9051b3",
           "obfuscator": "tigress",
-          "obpass": "copy"
+          "obpass": "copy",
+          "level": 100
         },
         "merge": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_merge.zip",
-          "size": 807578019,
-          "hash": "e46d761b39a0086f0e5a960f2470e24f",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_merge_100.zip",
+          "size": 10056583,
+          "hash": "d861e82186cfffb142d1de959dacd567",
           "obfuscator": "tigress",
-          "obpass": "merge"
+          "obpass": "merge",
+          "level": 100
         },
         "split": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_split.zip",
-          "size": 917709181,
-          "hash": "d80a96c9163bbf2b5fb3c74ee4f65809",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_split_100.zip",
+          "size": 97976518,
+          "hash": "92843bede193d1fe44d984344d4b3cd7",
           "obfuscator": "tigress",
-          "obpass": "split"
+          "obpass": "split",
+          "level": 100
         },
         "CFF": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_CFF.zip",
-          "size": 1033064078,
-          "hash": "e1dd42210a65eff7d530e8ff95b64ff9",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_CFF_100.zip",
+          "size": 118744555,
+          "hash": "ee030988ca839d6bda67b18ba562bc03",
           "obfuscator": "tigress",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_opaque.zip",
-          "size": 236611021,
-          "hash": "4b4dc19868811ee9ed03ba2d677492fa",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_opaque_100.zip",
+          "size": 16533615,
+          "hash": "efda248161534040c76e789ca54eb4f0",
           "obfuscator": "tigress",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "virtualize": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_virtualize.zip",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_virtualize_100.zip",
           "size": 22,
           "hash": "76cdb2bad9582d23c1f6f4d868218d6c",
           "obfuscator": "tigress",
-          "obpass": "virtualize"
+          "obpass": "virtualize",
+          "level": 100
         },
         "encodearith": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_encodearith.zip",
-          "size": 895589079,
-          "hash": "afe3e686c749c45d45b830d0b7e65bd5",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_encodearith_100.zip",
+          "size": 94108965,
+          "hash": "51ba2e0c6178e6d4ab98c3dcf5dd6266",
           "obfuscator": "tigress",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "encodeliteral": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_encodeliteral.zip",
-          "size": 849197949,
-          "hash": "5a89b32ab8efd9c510857ff555e54e77",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_encodeliteral_100.zip",
+          "size": 85559282,
+          "hash": "a09235cc958146cf2e8fefacc2243181",
           "obfuscator": "tigress",
-          "obpass": "encodeliteral"
+          "obpass": "encodeliteral",
+          "level": 100
         },
         "mix1": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_mix1.zip",
-          "size": 1030399319,
-          "hash": "73face42c2c3fe972cb8bb26a1087486",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_mix1_100.zip",
+          "size": 121468754,
+          "hash": "27fbd10c550c51e19fde09ad9f601d08",
           "obfuscator": "tigress",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         },
         "mix2": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_mix2.zip",
-          "size": 1076637613,
-          "hash": "443fde60aff895382e1781d9aac445e1",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/tigress/freetype_tigress_mix2_100.zip",
+          "size": 129036783,
+          "hash": "9e1b9e9e05472aca763414a1d482fff6",
           "obfuscator": "tigress",
-          "obpass": "mix2"
+          "obpass": "mix2",
+          "level": 100
         }
       },
       "ollvm": {
         "CFF": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_CFF.zip",
-          "size": 885176895,
-          "hash": "f61b5cbf17adfb0ec4bcb45b2775e5cf",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_CFF_100.zip",
+          "size": 80411012,
+          "hash": "084df76490dd5ea9aee2065d629d4638",
           "obfuscator": "ollvm",
-          "obpass": "CFF"
+          "obpass": "CFF",
+          "level": 100
         },
         "opaque": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_opaque.zip",
-          "size": 709613391,
-          "hash": "e8c4a92f6fa5feda5bc9b995738f8248",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_opaque_100.zip",
+          "size": 72858074,
+          "hash": "af231aab1ed6e660f1f7cc88eb2f654a",
           "obfuscator": "ollvm",
-          "obpass": "opaque"
+          "obpass": "opaque",
+          "level": 100
         },
         "encodearith": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_encodearith.zip",
-          "size": 542198965,
-          "hash": "8ed0ebb646909b5e8b6cd051d6fd30f4",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_encodearith_100.zip",
+          "size": 51629700,
+          "hash": "ce2f5149ec476ef1c011a5b6c17de821",
           "obfuscator": "ollvm",
-          "obpass": "encodearith"
+          "obpass": "encodearith",
+          "level": 100
         },
         "mix1": {
           "project": "freetype",
           "type": "obfuscated",
-          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_mix1.zip",
-          "size": 1418355767,
-          "hash": "69a1768ae48e80f1f38bb3af70b121c0",
+          "link": "https://obfuscation-dataset.s3.fr-par.scw.cloud/freetype/obfuscated/ollvm/freetype_ollvm_mix1_100.zip",
+          "size": 140408784,
+          "hash": "8f24580c7023e8adbe3293074eefdf7f",
           "obfuscator": "ollvm",
-          "obpass": "mix1"
+          "obpass": "mix1",
+          "level": 100
         }
       }
     }
