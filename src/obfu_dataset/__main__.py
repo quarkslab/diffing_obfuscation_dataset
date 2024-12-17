@@ -312,8 +312,8 @@ def download_plain(root: str, threads: int, project: tuple[str]):
 @click.option("-p", "--project", type=click.Choice(PROJ_OPT), required=True, help="Project to download")
 @click.option("-o", "--obfuscator", type=click.Choice(OBF_OPT), default=None, required=False, help="Obfuscator to select (all if none)")
 @click.option("-op", "--obf-pass", type=click.Choice(PASS_OPT), default=None, required=False, help="Obfuscation pass to download (all if none)")
-@click.option("-l", "--level", type=click.Choice(AVAILABLE_LEVELS), default=None, required=False, help="Obfuscation levels to download")
-def download_obfuscated(root: str, threads: int, project: str, obfuscator: str | None, obf_pass: str | None, level: int | None):
+@click.option("-l", "--level", type=click.Choice([str(l) for l in AVAILABLE_LEVELS]), default=None, required=False, help="Obfuscation levels to download")
+def download_obfuscated(root: str, threads: int, project: str, obfuscator: str | None, obf_pass: str | None, level: str | None):
     """
     Download only obfuscated zip files
     
