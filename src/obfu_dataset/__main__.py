@@ -303,7 +303,7 @@ def download_plain(root: str, threads: int, project: tuple[str]):
     else:  # Take all projects
         projects = [x for x in Project]
 
-    download_packages(root, threads, BinaryType.PLAIN, projects, [], [], [], [])
+    download_packages(root, threads, BinaryType.PLAIN, projects, [], [], [])
 
 
 @main.command(name="download-obfuscated")
