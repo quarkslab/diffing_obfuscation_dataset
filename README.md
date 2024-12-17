@@ -44,7 +44,7 @@ Each project is associated to the original sources (unobfuscated) along with obf
 ```bash 
 dataset/zlib/obfuscated/tigress/CFF/50/
 ```
-contains the list of the zlib project, obfuscated with the Tigress obfuscator, using the Control-Flow Graph Flattening pass (CFF) for which 50% of the zlib functions are obfuscated. Such a folder contains the original .c files and the corresponding .exe binaries. Binaries are stripped but symbols (function names) can be found in the corresponding .json files, that maps function addresses to their name. Each folder also contains exported binaries files: .BinExport and .Quokka.
+contains the list of the zlib project, obfuscated with the Tigress obfuscator, using the Control-Flow Graph Flattening pass (CFF) for which 50% of the zlib functions are obfuscated. Such a folder contains the original .c files and the corresponding .exe binaries. Binaries are stripped but symbols (function names) can be found in the corresponding .json files. Each folder also contains exported binaries files: .BinExport and .Quokka.
 
 Currently, the dataset provides:
 
@@ -54,6 +54,8 @@ Currently, the dataset provides:
 - obfuscation level, from 0% (folder sources), up to 100%, with a 10% step
 - x64 architecture
 - -O0 or -O2 binaries
+
+Json files contains the ground-truth associated to binaries. Each json file is a list of dictionaries, where each dictionary corresponds to a function, with a given address and name, that can either be obfuscated or not. 
 
 **File naming convention**
 
@@ -112,16 +114,15 @@ The ```ls``` command helps the user to manually check what has been downloaded.
 
 ```
 obfu-dataset-cli ls dataset/
-
 ```
 
 These three commands are sufficient for any users that would like to use this dataset. 
 
-### Recreate the dataset
+### Recreating the dataset
 
 The ```create, compile, extract-symbols, strip, export``` commands are available for people that would like to recreate the dataset. They should be executed in this order. 
 
-> Recreating the whole dataset will require a lot of time. Notice that we do not guarantee that the produced binaries will be exactly the same as the ones provided (due to compilation specificities)
+> Recreating the whole dataset will require a lot of time. Notice that we do not guarantee that the produced binaries will be exactly the same as the ones provided (due to compilation specificities). It might also erase data that you would have eventually download first. Consequently, make sure before trying to recreate the dataset that you don't do it at the same location as previously downloaded files.
 
 ## Detailed description
 
