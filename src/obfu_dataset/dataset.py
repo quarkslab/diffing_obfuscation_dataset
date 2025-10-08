@@ -145,7 +145,8 @@ class ObfuDataset(object):
                                 levels: int | list[int] = [],
                                 architectures: Architecture | list[Architecture] = [],
                                 compilers: Compiler | list[Compiler] = [],
-                                optims: OptimLevel | list[OptimLevel] = []) -> Iterable[Sample]:
+                                optims: OptimLevel | list[OptimLevel] = [], 
+                                seeds: list[int] = []) -> Iterable[Sample]:
         to_list = lambda x, typ, enu: [x] if isinstance(x, typ) else (x if x else enu)
 
         projects = to_list(projects, Project, Project)
@@ -162,7 +163,7 @@ class ObfuDataset(object):
                             for compiler in compilers:
                                 optims = to_list(optims, OptimLevel, OptimLevel)
                                 for optim in optims:
-                                    for seed in range(1, SEED_NUMBER+1):
+                                    for seed in seeds:
                                         yield Sample(
                                             project=proj,
                                             type=BinaryType.OBFUSCATED,

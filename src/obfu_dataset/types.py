@@ -14,7 +14,7 @@ class Obfuscator(Enum):
     OLLVM = "ollvm"
 
 class Compiler(Enum):
-    CLANG = "clang"
+    CLANG = "clang14"
     GCC = "gcc"
     
 class ObPass(Enum):

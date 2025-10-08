@@ -80,7 +80,9 @@ def mk_links(out: str):
         for obfu in Obfuscator:
             d[project.value]['obfuscated'][obfu.value] = {}
             for obpass in supported_passes(obfu):
+                d[project.value]['obfuscated'][obfu.value][obpass.value] = {}
                 for level in AVAILABLE_LEVELS:
+                    d[project.value]['obfuscated'][obfu.value][obpass.value][level] = {}
                     # Get info from remote file
                     zip_name = make_zip_name(project, BinaryType.OBFUSCATED, obfu, obpass, level)
                     remote_path = f"{REMOTE_NAME}:{REMOTE_NAME}/{project.value}/obfuscated/{obfu.value}/{zip_name}"
@@ -88,7 +90,7 @@ def mk_links(out: str):
                     url, size, hash = get_info_remote_file(remote_path)
                     # Create DownloadLink object
                     entry = DownloadLink(project, BinaryType.OBFUSCATED, url, size, hash, obfu, obpass, level)
-                    d[project.value]['obfuscated'][obfu.value][obpass.value] = to_json(entry)
+                    d[project.value]['obfuscated'][obfu.value][obpass.value][level] = to_json(entry)
 
 
     # Write the resulting json file
