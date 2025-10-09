@@ -219,4 +219,4 @@ class Sample:
 
     @property
     def exists(self) -> bool:
-        return self.source_file.exists()
+        return self.binary_file.exists()
