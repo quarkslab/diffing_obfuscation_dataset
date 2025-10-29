@@ -555,7 +555,7 @@ def strip(root):
     #    strip_file(console, sample.binary_file)
 
     for sample in dataset.iter_obfuscated_samples():
-        if sample.binary_file.exists():
+        if sample.binary_file.exists() and sample.symbols_file.exists(): # Strip only when symbols data are already extracted
             strip_file(console, sample.binary_file)
 
 
