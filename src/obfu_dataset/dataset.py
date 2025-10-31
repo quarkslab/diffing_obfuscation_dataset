@@ -177,7 +177,7 @@ class ObfuDataset(object):
                                             root_path=self.root_path
                                         )
 
-    def get_symbols(self, proj: Project) -> dict[int, str]:
+    def get_symbols(self, proj: Project) -> list[dict[str, Any]]:
         sample = self.get_plain_sample(proj)
         return json.loads(sample.symbols_file.read_text())
 
