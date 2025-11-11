@@ -4,6 +4,7 @@ import zipfile
 import logging
 import json
 import subprocess
+from typing import Any
 
 # from obfu_dataset import get_download_link
 from obfu_dataset.obfuscators import supported_passes
