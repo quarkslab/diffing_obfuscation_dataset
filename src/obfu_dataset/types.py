@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from enum import Enum, auto
 from dataclasses import dataclass
+from typing import Any
 
 SEED_NUMBER = 10
 
@@ -214,7 +215,7 @@ class Sample:
     def header_file(self) -> Path:
         return self.base_dir / (self.basename_src + ".h")
         
-    def get_symbols(self) -> dict[int, str]:
+    def get_symbols(self) -> list[dict[str, Any]]:
         return json.loads(self.symbols_file.read_text())
 
     @property
