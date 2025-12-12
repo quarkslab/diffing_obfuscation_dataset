@@ -180,7 +180,7 @@ class ObfuDataset(object):
 
     def get_symbols(self, proj: Project) -> list[dict[str, Any]] | None:
         sample = self.get_plain_sample(proj)
-        if sample.exists() and sample.symbols_file.exists():
+        if sample.exists and sample.symbols_file.exists():
             return json.loads(sample.symbols_file.read_text())
 
     def compile(self, sample: Sample) -> bool:
