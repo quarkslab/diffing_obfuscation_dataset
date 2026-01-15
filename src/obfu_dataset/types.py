@@ -202,7 +202,14 @@ class Sample:
     @property
     def quokka_file(self) -> Path:
         return self.base_dir / (self.basename_bin + ".Quokka")
-
+        
+    @property
+    def sqlite_file(self) -> Path:
+        # sqlite file are not included by default in the ObfuBench dataset.
+        # Need to recreate them if required following diaphora instructions
+        path = self.base_dir / (self.basename_bin + ".sqlite")
+        return path if path.exists() else None
+        
     @property
     def source_file(self) -> Path:
         return self.base_dir / (self.basename_src + ".c")
